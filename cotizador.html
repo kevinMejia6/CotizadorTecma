@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Generador de Cotizaciones</title>
+    <link
+      rel="stylesheet"
+      href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css"
+    />
+  </head>
+  <body>
+    <div class="container-fluid">
+      <div class="row">
+        <!-- Columna del Formulario -->
+        <div class="col-md-6 p-4">
+          <h1>Generador de Cotizaciones</h1>
+          <form id="quoteForm">
+            <div class="form-group">
+              <label for="client">Cliente:</label>
+              <input
+                type="text"
+                class="form-control"
+                id="client"
+                name="client"
+                required
+              />
+            </div>
+            <div class="form-group">
+              <label for="advisor">Asesor:</label>
+              <input
+                type="text"
+                class="form-control"
+                id="advisor"
+                name="advisor"
+                required
+              />
+            </div>
+            <div class="form-group">
+              <label for="code">Código:</label>
+              <input
+                type="text"
+                class="form-control"
+                id="code"
+                name="code"
+                required
+              />
+            </div>
+            <div class="form-group">
+              <label for="address">Dirección:</label>
+              <input
+                type="text"
+                class="form-control"
+                id="address"
+                name="address"
+                required
+              />
+            </div>
+            <h4>Detalles del Producto</h4>
+            <table id="productTable" class="table">
+              <thead>
+                <tr>
+                  <th>Cantidad</th>
+                  <th>Código</th>
+                  <th>Descripción</th>
+                  <th>Total</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>
+                    <input
+                      type="number"
+                      name="quantity"
+                      class="form-control"
+                      required
+                    />
+                  </td>
+                  <td>
+                    <input
+                      type="text"
+                      name="productCode"
+                      class="form-control"
+                      required
+                    />
+                  </td>
+                  <td>
+                    <input
+                      type="text"
+                      name="description"
+                      class="form-control"
+                      required
+                    />
+                  </td>
+                  <td>
+                    <input
+                      type="number"
+                      name="total"
+                      class="form-control"
+                      required
+                    />
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+            <button type="button" id="addRow" class="btn btn-primary">
+              Añadir Producto
+            </button>
+            <button type="button" id="generatePdf" class="btn btn-success">
+              Generar PDF
+            </button>
+          </form>
+        </div>
+
+        <!-- Columna de Previsualización -->
+        <div class="col-md-6 p-4">
+          <h2>Previsualización del PDF</h2>
+          <div id="pdfPreview">
+            <img
+              id="pdfImage"
+              src=""
+              alt="Previsualización PDF"
+              class="img-fluid"
+            />
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.4.0/jspdf.umd.min.js"></script>
+    <script src="script.js"></script>
+  </body>
+</html>
+
+<script>
+  // script.js
+
+  const { jsPDF } = window.jspdf;
+
+  // Añadir fila al formulario de productos
+  document.getElementById("addRow").addEventListener("click", () => {
+    const table = document
+      .getElementById("productTable")
+      .getElementsByTagName("tbody")[0];
+    const newRow = table.insertRow();
+    newRow.innerHTML = `
+        <td><input type="number" name="quantity" required></td>
+        <td><input type="text" name="productCode" required></td>
+        <td><input type="text" name="description" required></td>
+        <td><input type="number" name="total" required></td>
+    `;
+  });
+
+  // Generar PDF y previsualización
+  function generatePDF(preview = false) {
+    const doc = new jsPDF();
+
+    // Obtener datos del formulario
+    const client = document.getElementById("client").value;
+    const advisor = document.getElementById("advisor").value;
+    const code = document.getElementById("code").value;
+    const address = document.getElementById("address").value;
+
+    // Título
+    doc.setFontSize(18);
+    doc.text("Cotización", 105, 20, null, null, "center");
+
+    // Información del cliente
+    doc.setFontSize(12);
+    doc.text(`Cliente: ${client}`, 20, 40);
+    doc.text(`Asesor: ${advisor}`, 20, 50);
+    doc.text(`Código: ${code}`, 20, 60);
+    doc.text(`Dirección: ${address}`, 20, 70);
+
+    // Encabezado de tabla
+    doc.setFontSize(14);
+    doc.text("Detalles del Producto", 20, 90);
+    doc.setFontSize(10);
+    doc.text("Cantidad", 20, 100);
+    doc.text("Código", 50, 100);
+    doc.text("Descripción", 80, 100);
+    doc.text("Total", 160, 100);
+
+    // Agregar productos de la tabla
+    const rows = document.querySelectorAll("#productTable tbody tr");
+    let y = 110;
+    rows.forEach((row) => {
+      const quantity = row.querySelector('input[name="quantity"]').value;
+      const productCode = row.querySelector('input[name="productCode"]').value;
+      const description = row.querySelector('input[name="description"]').value;
+      const total = row.querySelector('input[name="total"]').value;
+
+      doc.text(quantity, 20, y);
+      doc.text(productCode, 50, y);
+      doc.text(description, 80, y);
+      doc.text(total, 160, y);
+      y += 10;
+    });
+
+    if (preview) {
+      // Generar base64 para previsualización
+      const pdfDataUri = doc.output("datauristring");
+      document.getElementById("pdfImage").src = pdfDataUri;
+    } else {
+      // Guardar PDF
+      doc.save("cotizacion.pdf");
+    }
+  }
+
+  // Previsualizar en tiempo real al cambiar los datos
+  document
+    .getElementById("quoteForm")
+    .addEventListener("input", () => generatePDF(true));
+
+  // Botón para descargar PDF
+  document
+    .getElementById("generatePdf")
+    .addEventListener("click", () => generatePDF(false));
+</script>

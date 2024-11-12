@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Generador de Cotizaciones</title>
+    <!-- Enlace a Bootstrap -->
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <div class="container mt-5">
+      <h1 class="text-center mb-4">Generador de Cotizaciones</h1>
+      <form id="quoteForm">
+        <!-- Formulario de cliente -->
+        <div class="row mb-3">
+          <div class="col-md-6">
+            <label for="client" class="form-label">Cliente:</label>
+            <input
+              type="text"
+              id="client"
+              name="client"
+              class="form-control"
+              required
+            />
+          </div>
+          <div class="col-md-6">
+            <label for="advisor" class="form-label">Asesor:</label>
+            <input
+              type="text"
+              id="advisor"
+              name="advisor"
+              class="form-control"
+              required
+            />
+          </div>
+        </div>
+        <div class="row mb-3">
+          <div class="col-md-6">
+            <label for="code" class="form-label">Código:</label>
+            <input
+              type="text"
+              id="code"
+              name="code"
+              class="form-control"
+              required
+            />
+          </div>
+          <div class="col-md-6">
+            <label for="address" class="form-label">Dirección:</label>
+            <input
+              type="text"
+              id="address"
+              name="address"
+              class="form-control"
+              required
+            />
+          </div>
+        </div>
+
+        <!-- Tabla de productos -->
+        <h2 class="my-4">Detalles del Producto</h2>
+        <div class="table-responsive">
+          <table class="table table-striped" id="productTable">
+            <thead class="table-dark">
+              <tr>
+                <th>Cantidad</th>
+                <th>Código</th>
+                <th>Descripción</th>
+                <th>Precio Unitario</th>
+                <th>Total</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>
+                  <input
+                    type="number"
+                    name="quantity"
+                    class="form-control"
+                    required
+                    onchange="updateRowTotal(this)"
+                  />
+                </td>
+                <td>
+                  <input
+                    type="text"
+                    name="productCode"
+                    class="form-control"
+                    required
+                  />
+                </td>
+                <td>
+                  <input
+                    type="text"
+                    name="description"
+                    class="form-control"
+                    required
+                  />
+                </td>
+                <td>
+                  <input
+                    type="number"
+                    name="unitPrice"
+                    class="form-control"
+                    required
+                    onchange="updateRowTotal(this)"
+                  />
+                </td>
+                <td>
+                  <input
+                    type="number"
+                    name="rowTotal"
+                    class="form-control totalField"
+                    readonly
+                  />
+                </td>
+              </tr>
+            </tbody>
+            <tfoot>
+              <tr>
+                <td colspan="4" class="text-end">
+                  <strong>Total General</strong>
+                </td>
+                <td><span id="grandTotal">0</span></td>
+              </tr>
+            </tfoot>
+          </table>
+        </div>
+
+        <div class="d-flex justify-content-between mt-4">
+          <button type="button" class="btn btn-primary" id="addRow">
+            Añadir Producto
+          </button>
+          <button type="button" class="btn btn-success" id="generatePdf">
+            Generar PDF
+          </button>
+        </div>
+      </form>
+    </div>
+
+    <!-- Librerías jsPDF y jsPDF-AutoTable -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.4.0/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.25/jspdf.plugin.autotable.min.js"></script>
+
+    <script>
+      // Función para añadir una nueva fila
+      document.getElementById("addRow").addEventListener("click", () => {
+        const table = document
+          .getElementById("productTable")
+          .getElementsByTagName("tbody")[0];
+        const newRow = table.insertRow();
+        newRow.innerHTML = `
+        <td><input type="number" name="quantity" class="form-control" required onchange="updateRowTotal(this)" /></td>
+        <td><input type="text" name="productCode" class="form-control" required /></td>
+        <td><input type="text" name="description" class="form-control" required /></td>
+        <td><input type="number" name="unitPrice" class="form-control" required onchange="updateRowTotal(this)" /></td>
+        <td><input type="number" name="rowTotal" class="form-control totalField" readonly /></td>
+      `;
+      });
+
+      // Función para calcular el total de una fila específica
+      function updateRowTotal(element) {
+        const row = element.closest("tr");
+        const quantity =
+          parseFloat(row.querySelector('input[name="quantity"]').value) || 0;
+        const unitPrice =
+          parseFloat(row.querySelector('input[name="unitPrice"]').value) || 0;
+        const rowTotal = quantity * unitPrice;
+        row.querySelector('input[name="rowTotal"]').value = rowTotal.toFixed(2);
+        calculateGrandTotal();
+      }
+
+      // Función para calcular el total general
+      function calculateGrandTotal() {
+        let grandTotal = 0;
+        const totalFields = document.querySelectorAll(".totalField");
+        totalFields.forEach((field) => {
+          const value = parseFloat(field.value) || 0;
+          grandTotal += value;
+        });
+        document.getElementById("grandTotal").innerText = grandTotal.toFixed(2);
+      }
+
+      // Generar PDF con AutoTable
+      document.getElementById("generatePdf").addEventListener("click", () => {
+        const { jsPDF } = window.jspdf;
+        const doc = new jsPDF();
+
+        const logoImg = "tecma.jpeg";
+        const fecha = new Date().toLocaleDateString();
+
+        const img = new Image();
+        img.src = logoImg;
+        img.onload = () => {
+          doc.addImage(img, "PNG", 1, 8, 45, 30);
+          doc.setFontSize(18);
+          doc.setTextColor(255);
+          doc.setFillColor(0, 51, 102);
+          doc.rect(170, 15, 40, 10, "F");
+          doc.setFontSize(10);
+          doc.setFont("helvetica", "bold");
+          doc.text("COTIZACIÓN", 180, 21.5);
+
+          doc.setFont("helvetica", "normal");
+          doc.setFontSize(12);
+          doc.setTextColor(0, 0, 0);
+          doc.text(`Fecha: ${fecha}`, 173, 29.5);
+
+          const client = document.getElementById("client").value;
+          const advisor = document.getElementById("advisor").value;
+          const code = document.getElementById("code").value;
+          const address = document.getElementById("address").value;
+
+          doc.text(`Cliente: ${client}`, 20, 50);
+          doc.text(`Asesor: ${advisor}`, 20, 60);
+          doc.text(`Código: ${code}`, 20, 70);
+          doc.text(`Dirección: ${address}`, 20, 80);
+
+          const headers = [
+            "Cantidad",
+            "Código",
+            "Descripción",
+            "Precio Unitario",
+            "Total",
+          ];
+          const data = [];
+          const rows = document.querySelectorAll("#productTable tbody tr");
+          let grandTotal = 0; // Variable para almacenar el total general
+
+          rows.forEach((row) => {
+            const quantity = row.querySelector('input[name="quantity"]').value;
+            const productCode = row.querySelector(
+              'input[name="productCode"]'
+            ).value;
+            const description = row.querySelector(
+              'input[name="description"]'
+            ).value;
+            const unitPrice = row.querySelector(
+              'input[name="unitPrice"]'
+            ).value;
+            const rowTotal =
+              parseFloat(row.querySelector('input[name="rowTotal"]').value) ||
+              0;
+
+            data.push([
+              quantity,
+              productCode,
+              description,
+              unitPrice,
+              rowTotal.toFixed(2),
+            ]);
+            grandTotal += rowTotal; // Sumar al total general
+          });
+
+          doc.autoTable({
+            startY: 90,
+            head: [headers],
+            body: data,
+            theme: "striped",
+            headStyles: { fillColor: [0, 51, 102], textColor: [255, 255, 255] },
+            styles: { halign: "center" },
+            columnStyles: {
+              0: { halign: "center" },
+              3: { halign: "center" },
+              4: { halign: "center" },
+            },
+          });
+
+          // Agregar el total general al final de la tabla
+          doc.autoTable({
+            body: [
+              [
+                {
+                  content: "Total a Pagar",
+                  colSpan: 4,
+                  styles: { halign: "center", fontStyle: "bold" },
+                },
+                grandTotal.toFixed(2),
+              ],
+            ],
+            theme: "plain",
+            styles: { halign: "right" },
+            startY: doc.lastAutoTable.finalY + 10,
+          });
+          const pageHeight =
+            doc.internal.pageSize.height || doc.internal.pageSize.getHeight();
+          doc.setFontSize(10);
+          doc.setTextColor(255);
+          doc.setFillColor(0, 51, 102);
+          doc.rect(0, pageHeight - 20, 210, 20, "F");
+
+          // Colocar el texto en posiciones horizontales distintas
+          doc.text(
+            "TECNICOS EN MAQUINARIA",
+            50,
+            pageHeight - 10,
+            null,
+            null,
+            "center"
+          );
+          doc.text(
+            "Tel: 7558-7258",
+            150,
+            pageHeight - 10,
+            null,
+            null,
+            "center"
+          );
+
+          doc.save("cotizacion.pdf");
+        };
+      });
+    </script>
+  </body>
+</html>

@@ -1,0 +1,108 @@
+/* styles.css */
+body {
+  font-family: Arial, sans-serif;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  margin: 0;
+  background-color: #f2f2f2; /* Fondo de página más suave */
+}
+
+.container {
+  width: 90%;
+  max-width: 900px;
+  padding: 30px;
+  background-color: #ffffff;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  border-radius: 10px;
+}
+
+h1,
+h2 {
+  text-align: center;
+  color: #333;
+}
+
+form {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.form-section {
+  display: flex;
+  flex-direction: column;
+}
+
+label {
+  margin-top: 10px;
+  font-weight: bold;
+  color: #444;
+}
+
+input[type="text"],
+input[type="number"] {
+  padding: 10px;
+  margin-top: 5px;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  font-size: 16px;
+  width: 100%;
+}
+
+#productTable {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 20px;
+}
+
+#productTable th,
+#productTable td {
+  padding: 12px;
+  text-align: center;
+  border: 1px solid #ddd;
+  font-size: 14px;
+}
+
+#productTable th {
+  background-color: #004a97; /* Color de fondo del encabezado */
+  color: white;
+  font-weight: bold;
+}
+
+#productTable tr:nth-child(even) {
+  background-color: #f2f2f2; /* Fila de color alternativo */
+}
+
+#productTable tr:hover {
+  background-color: #ddd; /* Efecto hover */
+}
+
+#addRow,
+#generatePdf {
+  margin: 20px auto;
+  padding: 12px 30px;
+  font-size: 16px;
+  cursor: pointer;
+  border: none;
+  background-color: #004a97;
+  color: white;
+  border-radius: 6px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  transition: background-color 0.3s ease;
+}
+
+#addRow:hover,
+#generatePdf:hover {
+  background-color: #45a049; /* Efecto hover en botones */
+}
+
+button:disabled {
+  background-color: #ccc;
+  cursor: not-allowed;
+}
+
+button:focus {
+  outline: none;
+}
