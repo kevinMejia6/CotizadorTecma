@@ -9,6 +9,10 @@
       href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css"
       rel="stylesheet"
     />
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css"
+      rel="stylesheet"
+    />
     <link rel="stylesheet" href="styles.css" />
   </head>
   <body>
@@ -69,15 +73,25 @@
           <table class="table table-striped" id="productTable">
             <thead class="table-dark">
               <tr>
+                <th></th>
                 <th>Cantidad</th>
-                <th>Código</th>
                 <th>Descripción</th>
                 <th>Precio Unitario</th>
                 <th>Total</th>
+                <th>Opciones</th>
               </tr>
             </thead>
             <tbody>
               <tr>
+                <td>
+                  <input
+                    type="text"
+                    name="productCode"
+                    class="form-control d-none"
+                    required
+                    readonly
+                  />
+                </td>
                 <td>
                   <input
                     type="number"
@@ -87,14 +101,7 @@
                     onchange="updateRowTotal(this)"
                   />
                 </td>
-                <td>
-                  <input
-                    type="text"
-                    name="productCode"
-                    class="form-control"
-                    required
-                  />
-                </td>
+
                 <td>
                   <input
                     type="text"
@@ -120,6 +127,16 @@
                     readonly
                   />
                 </td>
+                <td>
+                  <button
+                    type="button"
+                    class="btn btn-danger trash-btn"
+                    onclick="deleteRow(this)"
+                  >
+                    <i class="bi bi-trash"></i>
+                    <!-- Icono de basurero -->
+                  </button>
+                </td>
               </tr>
             </tbody>
             <tfoot>
@@ -127,7 +144,7 @@
                 <td colspan="4" class="text-end">
                   <strong>Total General</strong>
                 </td>
-                <td><span id="grandTotal">0</span></td>
+                <td><span id="grandTotal">$0</span></td>
               </tr>
             </tfoot>
           </table>
@@ -150,190 +167,6 @@
     <!-- Enlace a SweetAlert -->
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
-    <!-- <script>
-      // Variable para mantener el número secuencial del código
-      let quoteCounter = 1;
-
-      // Función para generar el código de cotización automáticamente
-      function generateQuoteCode() {
-        const today = new Date();
-        const dateStr = today.toISOString().slice(0, 10).replace(/-/g, ""); // Formato: YYYYMMDD
-        const code = `${dateStr}-${quoteCounter.toString().padStart(3, "0")}`;
-        document.getElementById("code").value = code;
-        quoteCounter++; // Incrementar el contador para la próxima cotización
-      }
-
-      // Llamar a la función para generar el código cuando la página se carga
-      window.onload = generateQuoteCode;
-
-      // Función para añadir una nueva fila
-      document.getElementById("addRow").addEventListener("click", () => {
-        const table = document
-          .getElementById("productTable")
-          .getElementsByTagName("tbody")[0];
-        const newRow = table.insertRow();
-        newRow.innerHTML = `
-        <td><input type="number" name="quantity" class="form-control" required onchange="updateRowTotal(this)" /></td>
-        <td><input type="text" name="productCode" class="form-control" required /></td>
-        <td><input type="text" name="description" class="form-control" required /></td>
-        <td><input type="number" name="unitPrice" class="form-control" required onchange="updateRowTotal(this)" /></td>
-        <td><input type="number" name="rowTotal" class="form-control totalField" readonly /></td>
-      `;
-      });
-
-      // Función para calcular el total de una fila específica
-      function updateRowTotal(element) {
-        const row = element.closest("tr");
-        const quantity =
-          parseFloat(row.querySelector('input[name="quantity"]').value) || 0;
-        const unitPrice =
-          parseFloat(row.querySelector('input[name="unitPrice"]').value) || 0;
-        const rowTotal = quantity * unitPrice;
-        row.querySelector('input[name="rowTotal"]').value = rowTotal.toFixed(2);
-        calculateGrandTotal();
-      }
-
-      // Función para calcular el total general
-      function calculateGrandTotal() {
-        let grandTotal = 0;
-        const totalFields = document.querySelectorAll(".totalField");
-        totalFields.forEach((field) => {
-          const value = parseFloat(field.value) || 0;
-          grandTotal += value;
-        });
-        document.getElementById("grandTotal").innerText = grandTotal.toFixed(2);
-      }
-
-      // Generar PDF con AutoTable
-      document.getElementById("generatePdf").addEventListener("click", () => {
-        const { jsPDF } = window.jspdf;
-        const doc = new jsPDF();
-
-        const logoImg = "tecma.jpeg";
-        const fecha = new Date().toLocaleDateString();
-
-        const img = new Image();
-        img.src = logoImg;
-        img.onload = () => {
-          doc.addImage(img, "PNG", 1, 8, 45, 30);
-          doc.setFontSize(18);
-          doc.setTextColor(255);
-          doc.setFillColor(0, 51, 102);
-          doc.rect(170, 15, 40, 10, "F");
-          doc.setFontSize(10);
-          doc.setFont("helvetica", "bold");
-          doc.text("COTIZACIÓN", 180, 21.5);
-
-          doc.setFont("helvetica", "normal");
-          doc.setFontSize(12);
-          doc.setTextColor(0, 0, 0);
-          doc.text(`Fecha: ${fecha}`, 173, 29.5);
-
-          const client = document.getElementById("client").value;
-          const advisor = document.getElementById("advisor").value;
-          const code = document.getElementById("code").value;
-          const address = document.getElementById("address").value;
-
-          doc.text(`Cliente: ${client}`, 20, 50);
-          doc.text(`Asesor: ${advisor}`, 20, 60);
-          doc.text(`Código: ${code}`, 20, 70);
-          doc.text(`Dirección: ${address}`, 20, 80);
-
-          const headers = [
-            "Cantidad",
-            "Código",
-            "Descripción",
-            "Precio Unitario",
-            "Total",
-          ];
-          const data = [];
-          const rows = document.querySelectorAll("#productTable tbody tr");
-          let grandTotal = 0; // Variable para almacenar el total general
-
-          rows.forEach((row) => {
-            const quantity = row.querySelector('input[name="quantity"]').value;
-            const productCode = row.querySelector(
-              'input[name="productCode"]'
-            ).value;
-            const description = row.querySelector(
-              'input[name="description"]'
-            ).value;
-            const unitPrice = row.querySelector(
-              'input[name="unitPrice"]'
-            ).value;
-            const rowTotal =
-              parseFloat(row.querySelector('input[name="rowTotal"]').value) ||
-              0;
-
-            data.push([
-              quantity,
-              productCode,
-              description,
-              unitPrice,
-              rowTotal.toFixed(2),
-            ]);
-            grandTotal += rowTotal; // Sumar al total general
-          });
-
-          doc.autoTable({
-            startY: 90,
-            head: [headers],
-            body: data,
-            theme: "striped",
-            headStyles: { fillColor: [0, 51, 102], textColor: [255, 255, 255] },
-            styles: { halign: "center" },
-            columnStyles: {
-              0: { halign: "center" },
-              3: { halign: "center" },
-              4: { halign: "center" },
-            },
-          });
-
-          // Agregar el total general al final de la tabla
-          doc.autoTable({
-            body: [
-              [
-                {
-                  content: "Total a Pagar",
-                  colSpan: 4,
-                  styles: { halign: "center", fontStyle: "bold" },
-                },
-                grandTotal.toFixed(2),
-              ],
-            ],
-            theme: "plain",
-            styles: { halign: "right" },
-            startY: doc.lastAutoTable.finalY + 10,
-          });
-          const pageHeight =
-            doc.internal.pageSize.height || doc.internal.pageSize.getHeight();
-          doc.setFontSize(10);
-          doc.setTextColor(255);
-          doc.setFillColor(0, 51, 102);
-          doc.rect(0, pageHeight - 20, 210, 20, "F");
-
-          // Colocar el texto en posiciones horizontales distintas
-          doc.text(
-            "TECNICOS EN MAQUINARIA",
-            50,
-            pageHeight - 10,
-            null,
-            null,
-            "center"
-          );
-          doc.text(
-            "Tel: 7558-7258",
-            150,
-            pageHeight - 10,
-            null,
-            null,
-            "center"
-          );
-
-          doc.save("cotizacion.pdf");
-        };
-      });
-    </script> -->
     <script>
       // Variable para mantener el número secuencial del código
       let quoteCounter = 1;
@@ -347,6 +180,30 @@
         quoteCounter++; // Incrementar el contador para la próxima cotización
       }
 
+      // Función para eliminar una fila de producto
+      function deleteRow(button) {
+        const table = document
+          .getElementById("productTable")
+          .getElementsByTagName("tbody")[0];
+        const rows = table.getElementsByTagName("tr");
+
+        // Verificar si solo queda una fila
+        if (rows.length === 1) {
+          Swal.fire({
+            icon: "warning",
+            title: "No se puede eliminar",
+            text: "No puedes eliminar la última fila.",
+            confirmButtonText: "Aceptar",
+          });
+          return; // No eliminar la fila si es la última
+        }
+
+        // Si no es la última fila, eliminar la fila
+        const row = button.closest("tr");
+        row.remove();
+        calculateGrandTotal(); // Recalcular el total general después de eliminar la fila
+      }
+
       // Llamar a la función para generar el código cuando la página se carga
       window.onload = generateQuoteCode;
 
@@ -357,13 +214,37 @@
           .getElementsByTagName("tbody")[0];
         const newRow = table.insertRow();
         newRow.innerHTML = `
-      <td><input type="number" name="quantity" class="form-control" required onchange="updateRowTotal(this)" /></td>
-      <td><input type="text" name="productCode" class="form-control" required /></td>
-      <td><input type="text" name="description" class="form-control" required /></td>
-      <td><input type="number" name="unitPrice" class="form-control" required onchange="updateRowTotal(this)" /></td>
-      <td><input type="number" name="rowTotal" class="form-control totalField" readonly /></td>
-    `;
+    <td><input type="text" name="productCode" class="form-control d-none" required /></td>
+    <td><input type="number" name="quantity" class="form-control" required onchange="updateRowTotal(this)" /></td>
+    <td><input type="text" name="description" class="form-control" required /></td>
+    <td><input type="number" name="unitPrice" class="form-control" required onchange="updateRowTotal(this)" /></td>
+    <td><input type="number" name="rowTotal" class="form-control totalField" readonly /></td>
+    <td><button type="button" class="btn btn-danger trash-btn" onclick="deleteRow(this)">
+      <i class="bi bi-trash"></i> <!-- Icono de basurero -->
+    </button></td>
+  `;
       });
+
+      // Función para generar el código del producto basado en la descripción
+      function generateProductCode(description) {
+        // Usar las primeras 3 letras de la descripción y un número secuencial
+        const prefix = description.slice(0, 3).toUpperCase(); // Toma las primeras 3 letras
+        const productCode = `${prefix}-${Date.now()}`; // Combina con la fecha actual para hacerlo único
+        return productCode;
+      }
+
+      // Función para actualizar el código del producto cuando cambie la descripción
+      document
+        .getElementById("productTable")
+        .addEventListener("input", function (event) {
+          if (event.target.name === "description") {
+            const description = event.target.value;
+            const productCode = generateProductCode(description);
+            const row = event.target.closest("tr");
+            const codeField = row.querySelector('input[name="productCode"]');
+            codeField.value = productCode; // Actualiza el campo del código del producto
+          }
+        });
 
       // Función para calcular el total de una fila específica
       function updateRowTotal(element) {
@@ -385,7 +266,9 @@
           const value = parseFloat(field.value) || 0;
           grandTotal += value;
         });
-        document.getElementById("grandTotal").innerText = grandTotal.toFixed(2);
+        document.getElementById(
+          "grandTotal"
+        ).innerText = `$${grandTotal.toFixed(2)}`;
       }
 
       // Función de validación de campos vacíos
@@ -551,6 +434,32 @@
           };
         }
       });
+      // Función para validar que solo se ingresen números en cantidad y precio unitario
+      function validateNumberInput(event) {
+        // Usamos una expresión regular para verificar si es un número positivo
+        const inputValue = event.target.value;
+        const isValidNumber = /^[0-9]*\.?[0-9]*$/.test(inputValue);
+
+        // Si el valor no es un número válido, lo eliminamos
+        if (!isValidNumber) {
+          event.target.value = inputValue.slice(0, -1); // Eliminar el último carácter no válido
+        }
+      }
+
+      // Añadir el evento de validación a los campos de cantidad y precio unitario
+      document
+        .querySelectorAll('input[name="quantity"], input[name="unitPrice"]')
+        .forEach((input) => {
+          input.addEventListener("input", validateNumberInput);
+        });
+
+      //TODO: Función para formatear valores a formato de dinero
+      function formatCurrency(value) {
+        return parseFloat(value).toLocaleString("es-ES", {
+          style: "currency",
+          currency: "EUR",
+        }); // Para EUR
+      }
     </script>
   </body>
 </html>
