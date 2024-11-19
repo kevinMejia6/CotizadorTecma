@@ -311,32 +311,55 @@
 
           // Establecer el encabezado
           doc.setFillColor(0, 51, 102); // Color azul oscuro
-          doc.rect(0, 0, 210, 40, "F"); // Rectángulo de fondo
+          doc.rect(0, 0, 210, 45, "F"); // Rectángulo de fondo
 
           // Logo en la izquierda (asegurándose de que la ruta es correcta)
           doc.addImage("tecma.jpeg", "JPEG", 4, 4, 30, 30); // Ajustar tamaño del logo (10, 10 es la posición y 30, 30 es el tamaño)
 
           // Dirección debajo del logo
           doc.setTextColor(255, 255, 255); // Texto blanco
-          doc.setFontSize(10);
-          doc.text("CALLE CUALQUIERA 123, CUALQUIER LUGAR, CP: 12345", 10, 40);
+
+          doc.setFontSize(11);
+          doc.text("Carretera troncal del norte y 25 calle oriente #4", 41, 30);
 
           // Título de la cotización y detalles a la derecha
           const currentDate = new Date().toLocaleDateString(); // Obtener fecha actual
+
           doc.setFontSize(14);
-          doc.text(`Cotización: #${code}`, 205, 10, null, null, "right");
-          doc.setFontSize(12);
-          doc.text(`Fecha:\t${currentDate}`, 180, 30, null, null, "right");
-          doc.text(`Vendedor:\t${advisor}`, 180, 39, null, null, "right");
-          doc.text(`Cliente:\t\t${client}`, 180, 20, null, null, "right");
+          doc.text(`Cotización: #${code}`, 101, 15, null, null, "right");
+
+          doc.setFontSize(11);
+          doc.text(`Cliente: ${client}`, 75, 22, null, null, "right");
+
+          doc.setFontSize(11);
+          // Descomentar esto si quiero que salga la informacion en el recuadro azul
+          doc.text(`Fecha: \t ${currentDate}`, 190, 15, null, null, "right");
+          doc.text(`Vendedor: \t ${advisor}`, 190, 30, null, null, "right");
+          doc.text(`Codigo: \t ${code}`, 197, 22, null, null, "right");
+
+          // doc.text(`Cliente: \t ${client}`, 190, 20, null, null, "right");
 
           // Espaciado para los detalles de la cotización
           doc.setFontSize(12);
           doc.setTextColor(0, 0, 0); // Texto negro
-          doc.text(`Cliente: ${client}`, 10, 60);
-          doc.text(`Asesor: ${advisor}`, 10, 70);
-          doc.text(`Código: ${code}`, 10, 80);
-          doc.text(`Dirección: ${address}`, 10, 90);
+          // doc.text(`Cliente: ${client}`, 10, 60);
+          // doc.text(`Asesor: ${advisor}`, 10, 70);
+          // doc.text(`Código: ${code}`, 10, 80);
+          // doc.text(`Dirección: ${address}`, 10, 90);
+
+          // TITULO DE DESCRPCION DE COTIZACION
+          doc.setFontSize(15);
+          doc.setTextColor(0, 0, 0); // Texto negro
+          // Agregar el texto
+          doc.text(`Descripción Cotización`, 10, 60);
+
+          // Dibujar la línea azul debajo del texto
+          const startX = 10; // Coordenada X inicial de la línea
+          const startY = 66; // Coordenada Y inicial de la línea (un poco debajo del texto)
+          const endX = 198; // Coordenada X final de la línea (ajústalo según el ancho deseado)
+
+          doc.setDrawColor(0, 51, 102); // Establece el color azul oscuro (RGB)
+          doc.line(startX, startY, endX, startY); // Dibuja la línea
 
           // Continuar con la tabla de productos y el resto del contenido
           const headers = ["Producto", "Cantidad", "Precio Unitario", "Total"];
@@ -359,7 +382,7 @@
           });
 
           doc.autoTable({
-            startY: 100,
+            startY: 75, //Para mover la posicion de alto de la tabla
             head: [headers],
             body: rows,
             headStyles: { fillColor: [0, 51, 102], textColor: 255 },
@@ -368,9 +391,11 @@
 
           // Total general
           const grandTotal = document.getElementById("grandTotal").innerText;
+          doc.setFontSize(12);
+
           doc.text(
-            `Total General: ${grandTotal}`,
-            150,
+            `Total a Pagar: ${grandTotal}`,
+            155,
             doc.lastAutoTable.finalY + 10
           );
 
