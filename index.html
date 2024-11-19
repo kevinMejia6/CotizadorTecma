@@ -332,8 +332,38 @@
           doc.setFontSize(14);
           doc.text(`Cotización: #${code}`, 101, 15, null, null, "right");
 
-          doc.setFontSize(11);
-          doc.text(`Cliente: ${client}`, 75, 22, null, null, "right");
+          doc.setFontSize(10);
+
+          const clientText = `Cliente: ${client}`;
+          const maxWidth = 250; // El ancho máximo permitido
+          let fontSize = 12; // Tamaño de fuente inicial
+          let yPosition = 22; // Posición Y inicial
+
+          // Dividir el texto si excede el ancho máximo
+          let clientLines = [clientText]; // Empezamos con el texto original
+
+          if (doc.getStringUnitWidth(clientText) * fontSize > maxWidth) {
+            const words = clientText.split(" ");
+            let line = "";
+            clientLines = [];
+
+            words.forEach((word) => {
+              const testLine = line ? `${line} ${word}` : word;
+              if (doc.getStringUnitWidth(testLine) * fontSize > maxWidth) {
+                clientLines.push(line);
+                line = word;
+              } else {
+                line = testLine;
+              }
+            });
+            clientLines.push(line); // Agregar la última línea
+          }
+
+          // Escribir el texto en el documento, agregando espacio entre líneas
+          clientLines.forEach((lineText) => {
+            doc.text(lineText, 40, yPosition, { align: "left" });
+            yPosition += fontSize + 5; // Incrementar Y y agregar espacio adicional (5 es el espacio entre líneas)
+          });
 
           doc.setFontSize(11);
           // Descomentar esto si quiero que salga la informacion en el recuadro azul
