@@ -301,8 +301,12 @@
       document.getElementById("generatePdf").addEventListener("click", () => {
         if (validateForm()) {
           const { jsPDF } = window.jspdf;
-          const doc = new jsPDF();
-
+          // Cambia el tamaño de la página aquí
+          const doc = new jsPDF({
+            orientation: "portrait", // Orientación vertical
+            unit: "mm", // Unidades en milímetros
+            format: [230, 205], // Tamaño A5
+          });
           // Datos del encabezado
           const client = document.getElementById("client").value;
           const advisor = document.getElementById("advisor").value;
@@ -395,7 +399,7 @@
 
           doc.text(
             `Total a Pagar: ${grandTotal}`,
-            155,
+            148,
             doc.lastAutoTable.finalY + 10
           );
 
@@ -407,22 +411,21 @@
             doc.lastAutoTable.finalY + 20
           );
 
-          doc.text("Firma del Cliente", 40, doc.lastAutoTable.finalY + 50);
-          doc.text("Firma del Vendedor", 140, doc.lastAutoTable.finalY + 50);
+          doc.text("Firma del Cliente", 40, doc.lastAutoTable.finalY + 128);
+          doc.text("Firma del Vendedor", 138, doc.lastAutoTable.finalY + 128);
 
           doc.line(
             30,
-            doc.lastAutoTable.finalY + 45,
+            doc.lastAutoTable.finalY + 120,
             80,
-            doc.lastAutoTable.finalY + 45
+            doc.lastAutoTable.finalY + 120
           ); // Línea de firma cliente
           doc.line(
             130,
-            doc.lastAutoTable.finalY + 45,
+            doc.lastAutoTable.finalY + 120,
             180,
-            doc.lastAutoTable.finalY + 45
+            doc.lastAutoTable.finalY + 120
           ); // Línea de firma vendedor
-
           // Guardar PDF
           doc.save("cotizacion.pdf");
         }
