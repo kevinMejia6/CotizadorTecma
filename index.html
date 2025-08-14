@@ -50,6 +50,7 @@
         }
       }
 
+      /* Tabla -> tarjetas en móviles */
       @media (max-width: 640px) {
         table.responsive {
           display: block;
@@ -103,7 +104,7 @@
         color: #fff !important;
       }
 
-      /* Helpers de UI (sin @apply) */
+      /* Helpers de UI */
       .card {
         background: #fff;
         border-radius: 16px;
@@ -412,11 +413,7 @@
           <div class="p-4 sm:p-6 space-y-3">
             <div class="flex items-center justify-between">
               <span class="text-slate-600">Subtotal</span>
-              <input
-                id="subtotal"
-                class="input w-36 text-right font-medium"
-                readonly
-              />
+              <input id="subtotal" class="input w-36 sm:text-right" readonly />
             </div>
             <div class="flex items-center justify-between">
               <label class="inline-flex items-center gap-2 select-none">
@@ -428,7 +425,7 @@
                 />
                 <span>IVA 13%</span>
               </label>
-              <input id="tax" class="input w-36 text-right" readonly />
+              <input id="tax" class="input w-36 sm:text-right" readonly />
             </div>
             <div class="flex items-center justify-between">
               <span class="text-slate-600">Descuento Global (%)</span>
@@ -438,7 +435,7 @@
                 min="0"
                 max="100"
                 step="0.01"
-                class="input w-36 text-right"
+                class="input w-36 sm:text-right"
                 value="0"
                 inputmode="decimal"
               />
@@ -450,7 +447,7 @@
                 type="number"
                 min="0"
                 step="0.01"
-                class="input w-36 text-right"
+                class="input w-36 sm:text-right"
                 value="0"
                 inputmode="decimal"
               />
@@ -460,7 +457,7 @@
               <span class="font-semibold">Total a Pagar</span>
               <input
                 id="grandTotal"
-                class="input w-40 text-right font-semibold"
+                class="input w-40 sm:text-right font-semibold"
                 readonly
               />
             </div>
@@ -677,7 +674,7 @@
           }
         });
 
-        // Fotos: soporta botón icono (desktop) y botón ancho (móvil)
+        // Fotos: botón icono (desktop) y botón ancho (móvil)
         tbody.addEventListener("click", (e) => {
           const btn = e.target.closest(".photo-btn, .photo-btn-mobile");
           if (btn) btn.closest("tr").querySelector(".photo-input").click();
@@ -757,20 +754,19 @@
         };
       }
 
-      // >>>>> addRow acepta focusDesc (true por defecto)
+      // >>>>> addRow acepta focusDesc (true por defecto) y alinea inputs numéricos: móvil izq / escritorio der
       function addRow(data = {}, focusDesc = true) {
         const tr = document.createElement("tr");
         tr.className = "odd:bg-white even:bg-slate-50 hover:bg-slate-100";
         tr.innerHTML = `
         <td class="px-3 py-2" data-label="SKU"><input class="cell-input sku" placeholder="SKU" /></td>
-        <td class="px-3 py-2" data-label="Cantidad"><input type="number" min="0" step="0.01" class="cell-input qty text-right" inputmode="decimal" /></td>
+        <td class="px-3 py-2" data-label="Cantidad"><input type="number" min="0" step="0.01" class="cell-input qty sm:text-right" inputmode="decimal" /></td>
         <td class="px-3 py-2" data-label="Descripción"><input class="cell-input desc" placeholder="Descripción" /></td>
-        <td class="px-3 py-2" data-label="P. Unit"><input type="number" min="0" step="0.01" class="cell-input unit text-right" inputmode="decimal" /></td>
-        <td class="px-3 py-2" data-label="Desc. %"><input type="number" min="0" max="100" step="0.01" class="cell-input disc text-right" value="0" inputmode="decimal" /></td>
+        <td class="px-3 py-2" data-label="P. Unit"><input type="number" min="0" step="0.01" class="cell-input unit sm:text-right" inputmode="decimal" /></td>
+        <td class="px-3 py-2" data-label="Desc. %"><input type="number" min="0" max="100" step="0.01" class="cell-input disc sm:text-right" value="0" inputmode="decimal" /></td>
         <td class="px-3 py-2" data-label="Foto" style="width:220px;">
           <div class="flex items-center gap-2 w-full">
-            <!-- input real -->
-            <input type="file" accept="image/*" class="photo-input hidden">
+            <input type="file" accept="image/*" class="photo-input hidden" capture="environment">
             <input type="hidden" class="photo-data" />
             <!-- Desktop: ícono -->
             <button class="btn-icon photo-btn hidden sm:inline-flex" type="button" title="Agregar foto">
@@ -784,7 +780,7 @@
             <img class="photo-preview h-10 w-10 rounded object-cover hidden" alt="Foto" />
           </div>
         </td>
-        <td class="px-3 py-2" data-label="Total"><input class="cell-input total text-right font-medium" readonly /></td>
+        <td class="px-3 py-2" data-label="Total"><input class="cell-input total sm:text-right font-medium" readonly /></td>
         <td class="px-2 py-2 text-center no-print" data-actions>
           <button class="btn-icon del-row" type="button" title="Eliminar fila"><i class="bi bi-trash"></i></button>
         </td>`;
