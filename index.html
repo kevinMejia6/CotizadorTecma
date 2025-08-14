@@ -12,7 +12,7 @@
       darkMode: ['class', '[data-theme="dark"]'],
       theme: {
         extend: {
-          colors: { brand: { DEFAULT:'#3a5998', 700:'#2a437f' } }, /* color del logo */
+          colors: { brand: { DEFAULT:'#3a5998', 700:'#2a437f' } },
           boxShadow: { soft: '0 10px 25px -10px rgba(2,6,23,.15)' }
         }
       }
@@ -33,7 +33,6 @@
     input[type=number]{ -moz-appearance:textfield; }
     @media print{ .no-print{ display:none !important } }
 
-    /* Tabla -> tarjetas en móviles */
     @media (max-width: 640px){
       table.responsive{ display:block; }
       table.responsive thead{ display:none; }
@@ -45,12 +44,25 @@
       table.responsive td[data-actions]{ justify-content:flex-end; }
     }
 
-    /* Miniatura */
     .photo-preview{ max-width: 2.5rem; max-height: 2.5rem; }
 
     /* Encabezados de tabla HTML con color corporativo */
     #productTable thead tr { background:#3a5998 !important; }
     #productTable thead th { color:#fff !important; }
+
+    /* Helpers de UI (sin @apply) */
+    .card{ background:#fff; border-radius:16px; box-shadow:0 10px 25px -12px rgba(2,6,23,.15); border:1px solid #e5e7eb; overflow:hidden; }
+    .label{ display:block; font-size:.875rem; font-weight:500; color:#334155; margin-bottom:.25rem; }
+    .input{ width:100%; border-radius:12px; border:1px solid #cbd5e1; background:#fff; padding:.5rem .75rem; font-size:.875rem; box-shadow: inset 0 1px 2px rgba(2,6,23,.03); outline: none; }
+    .input:focus{ border-color:#3a5998; box-shadow: 0 0 0 4px rgba(58,89,152,.18), inset 0 1px 2px rgba(2,6,23,.03); }
+    .btn-primary{ display:inline-flex; align-items:center; justify-content:center; gap:.5rem; border-radius:12px; background:#3a5998; padding:.5rem 1rem; font-size:.875rem; font-weight:600; color:white; box-shadow:0 8px 20px -12px rgba(58,89,152,.55); }
+    .btn-primary:hover{ background:#2a437f; }
+    .btn-secondary{ display:inline-flex; align-items:center; justify-content:center; gap:.5rem; border-radius:12px; border:1px solid #cbd5e1; background:#fff; padding:.5rem 1rem; font-size:.875rem; font-weight:600; color:#334155; }
+    .btn-secondary:hover{ background:#f8fafc; }
+    .btn-danger{ display:inline-flex; align-items:center; justify-content:center; gap:.5rem; border-radius:12px; background:#e11d48; padding:.5rem 1rem; font-size:.875rem; font-weight:600; color:white; }
+    .btn-icon{ display:inline-flex; align-items:center; justify-content:center; border-radius:8px; border:1px solid #cbd5e1; background:#fff; padding:.5rem; color:#334155; }
+    .cell-input{ width:100%; border-radius:10px; border:1px solid #cbd5e1; background:#fff; padding:.375rem .5rem; font-size:.875rem; }
+    .cell-input:focus{ border-color:#3a5998; box-shadow: 0 0 0 3px rgba(58,89,152,.18); outline:none; }
   </style>
 </head>
 <body class="bg-gradient-to-b from-slate-50 to-slate-100 text-slate-800 min-h-screen selection:bg-brand/10" data-theme="light">
@@ -58,13 +70,11 @@
     <!-- Header -->
     <header class="bg-white/90 backdrop-blur rounded-2xl shadow-soft ring-1 ring-slate-200 p-4 sm:p-6 flex flex-col md:flex-row md:items-center md:justify-between gap-3">
       <div class="flex items-center gap-3">
-        <!-- Logo TECMA (SVG inline) -->
+        <!-- Logo TECMA (SVG inline para la UI) -->
         <svg id="tecmaLogo" viewBox="0 0 400 240" xmlns="http://www.w3.org/2000/svg" class="h-10 w-auto select-none">
           <rect x="0" y="0" width="400" height="240" rx="20" ry="20" fill="#3a5998"/>
-          <circle cx="360" cy="40" r="8" fill="#ffffff" opacity="0.3"/>
           <text x="200" y="110" font-family="Arial, sans-serif" font-size="48" font-weight="bold" text-anchor="middle" fill="white">TECMA</text>
           <text x="200" y="140" font-family="Arial, sans-serif" font-size="14" text-anchor="middle" fill="white" letter-spacing="2px">TÉCNICOS EN MAQUINARIA</text>
-          <line x1="120" y1="155" x2="280" y2="155" stroke="white" stroke-width="2"/>
         </svg>
         <h1 class="text-2xl sm:text-3xl font-extrabold tracking-tight text-brand">Cotizador TECMA</h1>
       </div>
@@ -204,35 +214,6 @@
     const BRAND = { r:58, g:89, b:152 };           // #3a5998
     const BRAND_RGB = [BRAND.r, BRAND.g, BRAND.b];
 
-    /* ===== Helpers de estilo (sin @apply) ===== */
-    const injectHelpers = () => {
-      const css = `
-        .card{ background:#fff; border-radius:16px; box-shadow:0 10px 25px -12px rgba(2,6,23,.15); border:1px solid #e5e7eb; overflow:hidden; }
-        .label{ display:block; font-size:.875rem; font-weight:500; color:#334155; margin-bottom:.25rem; }
-        .input{ width:100%; border-radius:12px; border:1px solid #cbd5e1; background:#fff; padding:.5rem .75rem; font-size:.875rem; box-shadow: inset 0 1px 2px rgba(2,6,23,.03); outline: none; }
-        .input:focus{ border-color:#3a5998; box-shadow: 0 0 0 4px rgba(58,89,152,.18), inset 0 1px 2px rgba(2,6,23,.03); }
-        .btn-primary{ display:inline-flex; align-items:center; justify-content:center; gap:.5rem; border-radius:12px; background:#3a5998; padding:.5rem 1rem; font-size:.875rem; font-weight:600; color:white; box-shadow:0 8px 20px -12px rgba(58,89,152,.55); }
-        .btn-primary:hover{ background:#2a437f; }
-        .btn-secondary{ display:inline-flex; align-items:center; justify-content:center; gap:.5rem; border-radius:12px; border:1px solid #cbd5e1; background:#fff; padding:.5rem 1rem; font-size:.875rem; font-weight:600; color:#334155; }
-        .btn-secondary:hover{ background:#f8fafc; }
-        .btn-danger{ display:inline-flex; align-items:center; justify-content:center; gap:.5rem; border-radius:12px; background:#e11d48; padding:.5rem 1rem; font-size:.875rem; font-weight:600; color:white; }
-        .btn-icon{ display:inline-flex; align-items:center; justify-content:center; border-radius:8px; border:1px solid #cbd5e1; background:#fff; padding:.5rem; color:#334155; }
-        .cell-input{ width:100%; border-radius:10px; border:1px solid #cbd5e1; background:#fff; padding:.375rem .5rem; font-size:.875rem; }
-        .cell-input:focus{ border-color:#3a5998; box-shadow: 0 0 0 3px rgba(58,89,152,.18); outline:none; }
-        @media (prefers-color-scheme: dark){
-          body:not([data-theme="light"]) .card{ background:#0b1220; border-color:#1f2937; }
-          body:not([data-theme="light"]) .label{ color:#cbd5e1; }
-          body:not([data-theme="light"]) .input{ background:#0b1220; border-color:#334155; color:#e2e8f0; }
-          body:not([data-theme="light"]) table.responsive tr{ background:#0b1220; border-color:#1f2937; }
-          body:not([data-theme="light"]) table.responsive td{ border-bottom-color:#1f2937; }
-          body:not([data-theme="light"]) .btn-secondary{ background:#0b1220; border-color:#334155; color:#e2e8f0; }
-          body:not([data-theme="light"]) .btn-icon{ background:#0b1220; border-color:#334155; color:#e2e8f0; }
-        }
-      `;
-      const style = document.createElement('style');
-      style.textContent = css; document.head.appendChild(style);
-    };
-
     /* ===== Utilidades ===== */
     const fmt = new Intl.NumberFormat('es-SV', { style:'currency', currency:'USD' });
     const unfmt = v => Number(String(v).replace(/[^0-9.-]/g,'')) || 0;
@@ -240,22 +221,22 @@
     const el = id => document.getElementById(id);
     const ls = { get: (k,def)=>{ try{ return JSON.parse(localStorage.getItem(k)) ?? def }catch{ return def } }, set: (k,v)=>localStorage.setItem(k, JSON.stringify(v)) };
 
-    /* ===== Estado ===== */
     const state = { items: [], header: { code:'', date: todayISO(), client:'', advisor:'TECMA', address:'Carretera troncal del norte y 25 calle oriente #4', validDays:30, notes:'' }, totals: { subtotal:0, tax:0, grand:0, shipping:0, globalDiscount:0, applyTax:true } };
 
-    /* ===== Inicialización ===== */
     function init(){
-      injectHelpers();
       el('date').value = todayISO();
-      el('advisor').value = state.header.advisor;
-      el('address').value = state.header.address;
       generateQuoteCode();
-      addRow();
+
+      // Primera fila sin enfocar descripción
+      addRow({}, false);
+
       bindUI();
       recalc();
+
+      // Foco inicial en Cliente
+      setTimeout(() => el('client').focus(), 0);
     }
 
-    /* Tema */
     document.addEventListener('click', (e)=>{
       if(e.target.closest('#toggleTheme')){
         const t = document.body.dataset.theme === 'light' ? 'dark' : 'light';
@@ -263,18 +244,6 @@
       }
     });
 
-    /* Carga de imagen */
-    function loadImage(src){
-      return new Promise((resolve, reject)=>{
-        const img = new Image();
-        img.crossOrigin = 'anonymous';
-        img.onload = ()=> resolve(img);
-        img.onerror = reject;
-        img.src = src;
-      });
-    }
-
-    /* SVG -> PNG (DataURL) */
     async function svgToPngDataURL(svgElement, outW = 300, outH = 180) {
       const svgString = new XMLSerializer().serializeToString(svgElement);
       const svgBlob = new Blob([svgString], { type: 'image/svg+xml;charset=utf-8' });
@@ -297,7 +266,6 @@
       return canvas.toDataURL('image/png');
     }
 
-    /* Tamaño natural de un DataURL */
     function getImageSizeFromDataURL(dataUrl){
       return new Promise((resolve, reject) => {
         const img = new Image();
@@ -307,7 +275,6 @@
       });
     }
 
-    /* Archivo -> JPEG (DataURL) escalado */
     function fileToJpegDataURL(file, { maxW = 1800, maxH = 1800, quality = 0.9 } = {}) {
       return new Promise((resolve, reject) => {
         const reader = new FileReader();
@@ -333,7 +300,6 @@
       });
     }
 
-    /* Código de cotización: YYYYMMDD-### */
     function generateQuoteCode(){
       const d = el('date').value || todayISO();
       const key = `quote-counter-${d}`; const next = (ls.get(key,0) + 1); ls.set(key,next);
@@ -341,68 +307,49 @@
     }
 
     function bindUI(){
-      // Botones
-      el('addRow').addEventListener('click', addRow);
-      el('fab-add').addEventListener('click', addRow);
+      document.getElementById('addRow').addEventListener('click', ()=>addRow());
+      document.getElementById('fab-add').addEventListener('click', ()=>addRow());
       document.addEventListener('keydown', (e)=>{ if(e.ctrlKey && e.key==='Enter'){ e.preventDefault(); addRow(); } });
-      el('generatePdf').addEventListener('click', generatePDF);
-      el('fab-pdf').addEventListener('click', generatePDF);
-      el('btn-new').addEventListener('click', newQuote);
-      el('btn-save').addEventListener('click', saveQuote);
-      el('btn-load').addEventListener('click', loadQuoteDialog);
-      el('btn-export-json').addEventListener('click', exportJSON);
-      el('import-json').addEventListener('change', importJSON);
-      el('quickAdd').addEventListener('click', openQuickAdd);
+      document.getElementById('generatePdf').addEventListener('click', generatePDF);
+      document.getElementById('fab-pdf').addEventListener('click', generatePDF);
 
-      // Tabla: delegación
       const tbody = document.getElementById('tbody');
       tbody.addEventListener('input', (e)=>{ const tr = e.target.closest('tr'); if(tr){ calcRow(tr); recalc(); } });
       tbody.addEventListener('click', (e)=>{ const btn = e.target.closest('.del-row'); if(btn){ removeRow(btn.closest('tr')); } });
 
-      // FOTO: botón cámara / ampliar miniatura
+      // Fotos
       tbody.addEventListener('click', (e) => {
         const btn = e.target.closest('.photo-btn');
         if (btn) btn.closest('tr').querySelector('.photo-input').click();
         const img = e.target.closest('.photo-preview');
-        if (img) {
-          Swal.fire({ imageUrl: img.src, imageAlt: 'Foto de referencia', showConfirmButton:false, showCloseButton:true, width: Math.min(700, window.innerWidth - 40) });
-        }
+        if (img) Swal.fire({ imageUrl: img.src, imageAlt: 'Foto de referencia', showConfirmButton:false, showCloseButton:true, width: Math.min(700, window.innerWidth - 40) });
       });
-
-      // FOTO: convertir a JPEG (DataURL), mostrar miniatura y sincronizar estado
       tbody.addEventListener('change', async (e) => {
         const input = e.target.closest('.photo-input');
         if (!input) return;
         const tr = input.closest('tr');
         const file = input.files?.[0];
         if (!file) return;
-
-        const MAX_FILE = 6 * 1024 * 1024; // 6MB
+        const MAX_FILE = 6 * 1024 * 1024;
         if (file.size > MAX_FILE) {
           Swal.fire({ icon:'warning', title:'Imagen muy grande', text:'Elige una imagen menor a 6MB.' });
           input.value = '';
           return;
         }
-
         try {
           const dataUrl = await fileToJpegDataURL(file, { maxW: 1800, maxH: 1800, quality: 0.9 });
           tr.querySelector('.photo-data').value = dataUrl;
           const img = tr.querySelector('.photo-preview');
           img.src = dataUrl;
           img.classList.remove('hidden');
-
-          readItems();           // sincroniza inmediatamente
-          input.value = '';      // permite re-seleccionar la misma imagen
-
+          readItems();
+          input.value = '';
         } catch (err) {
           Swal.fire({ icon:'error', title:'No se pudo procesar la imagen', text: String(err) });
         }
       });
 
-      // Totales y header
-      el('applyTax').addEventListener('change', recalc);
-      el('globalDiscount').addEventListener('input', recalc);
-      el('shipping').addEventListener('input', recalc);
+      ['applyTax','globalDiscount','shipping'].forEach(id=> el(id).addEventListener('input', recalc));
       ['client','advisor','address','validDays','notes','date'].forEach(id=>{ el(id).addEventListener('input', syncHeader); el(id).addEventListener('change', syncHeader); });
       el('date').addEventListener('change', ()=>{ generateQuoteCode(); syncHeader(); });
     }
@@ -411,8 +358,8 @@
       state.header = { code: el('code').value, date: el('date').value, client: el('client').value, advisor: el('advisor').value, address: el('address').value, validDays: Number(el('validDays').value)||30, notes: el('notes').value };
     }
 
-    /* ===== Filas ===== */
-    function addRow(data={}){
+    // >>>>> CAMBIO: addRow acepta focusDesc (default true)
+    function addRow(data = {}, focusDesc = true){
       const tr = document.createElement('tr');
       tr.className = 'odd:bg-white even:bg-slate-50 hover:bg-slate-100';
       tr.innerHTML = `
@@ -421,40 +368,30 @@
         <td class="px-3 py-2" data-label="Descripción"><input class="cell-input desc" placeholder="Descripción" /></td>
         <td class="px-3 py-2" data-label="P. Unit"><input type="number" min="0" step="0.01" class="cell-input unit text-right" inputmode="decimal" /></td>
         <td class="px-3 py-2" data-label="Desc. %"><input type="number" min="0" max="100" step="0.01" class="cell-input disc text-right" value="0" inputmode="decimal" /></td>
-
-        <!-- FOTO opcional -->
         <td class="px-3 py-2" data-label="Foto">
           <div class="flex items-center gap-2">
-            <button class="btn-icon photo-btn" type="button" title="Agregar foto">
-              <i class="bi bi-camera"></i>
-            </button>
+            <button class="btn-icon photo-btn" type="button" title="Agregar foto"><i class="bi bi-camera"></i></button>
             <input type="file" accept="image/*" class="photo-input hidden">
             <input type="hidden" class="photo-data" />
             <img class="photo-preview h-10 w-10 rounded object-cover hidden" alt="Foto" />
           </div>
         </td>
-
         <td class="px-3 py-2" data-label="Total"><input class="cell-input total text-right font-medium" readonly /></td>
         <td class="px-2 py-2 text-center no-print" data-actions>
           <button class="btn-icon del-row" type="button" title="Eliminar fila"><i class="bi bi-trash"></i></button>
         </td>`;
-      const tbody = document.getElementById('tbody');
-      tbody.appendChild(tr);
+      document.getElementById('tbody').appendChild(tr);
+
       tr.querySelector('.sku').value  = data.sku  ?? '';
       tr.querySelector('.qty').value  = data.qty  ?? '';
       tr.querySelector('.desc').value = data.desc ?? '';
       tr.querySelector('.unit').value = data.unit ?? '';
       tr.querySelector('.disc').value = data.disc ?? 0;
       tr.querySelector('.total').value = fmt.format(0);
-
       tr.querySelector('.photo-data').value = data.photo ?? '';
-      if (data.photo) {
-        const img = tr.querySelector('.photo-preview');
-        img.src = data.photo;
-        img.classList.remove('hidden');
-      }
+      if (data.photo) { const img = tr.querySelector('.photo-preview'); img.src = data.photo; img.classList.remove('hidden'); }
 
-      tr.querySelector('.desc').focus();
+      if (focusDesc) tr.querySelector('.desc').focus();  // <<< foco condicional
     }
 
     function removeRow(tr){
@@ -488,7 +425,6 @@
       state.items = items; return items;
     }
 
-    /* ===== Cálculos ===== */
     function recalc(){
       const items = readItems();
       let subtotal = 0; items.forEach(it=>{ subtotal += it.qty * it.unit * (1 - it.disc/100); });
@@ -503,7 +439,7 @@
       el('subtotal').value = fmt.format(subtotal);
       el('tax').value = fmt.format(tax);
       el('grandTotal').value = fmt.format(grand);
-      el('stickyTotal').textContent = fmt.format(grand);
+      document.getElementById('stickyTotal').textContent = fmt.format(grand);
 
       state.totals = { subtotal, tax, grand, shipping, globalDiscount: globalDiscountPct, applyTax };
       return state.totals;
@@ -513,83 +449,11 @@
       syncHeader();
       const h = state.header; const items = state.items.length? state.items : readItems();
       if(!h.client || !h.advisor){ Swal.fire({ icon:'warning', title:'Campos requeridos', text:'Ingrese Cliente y Asesor.' }); return false; }
-      if(!/^[0-9]{4}-[0-9]{2}-[0-9]{2}$/.test(h.date)){ Swal.fire({ icon:'warning', title:'Fecha inválida', text:'Seleccione una fecha válida (YYYY-MM-DD).' }); return false; }
+      if(!/^[0-9]{4}-[0-9]{2}-[0-9]{2}$/.test(h.date)){ Swal.fire({ icon:'warning', title:'Fecha inválida', text:'Seleccione una fecha válida.' }); return false; }
       if(!items.length || items.every(it=>!it.desc || it.qty<=0 || it.unit<=0)){ Swal.fire({ icon:'warning', title:'Detalle incompleto', text:'Agregue al menos un ítem válido.' }); return false; }
       return true;
     }
 
-    /* ===== Persistencia ===== */
-    function newQuote(){
-      Swal.fire({ icon:'question', title:'¿Nueva cotización?', text:'Se limpiará el formulario actual.', showCancelButton:true, confirmButtonText:'Sí, continuar', cancelButtonText:'Cancelar' }).then(r=>{
-        if(!r.isConfirmed) return;
-        document.getElementById('tbody').innerHTML = '';
-        addRow();
-        ['client','notes'].forEach(id=> el(id).value='');
-        el('advisor').value='TECMA';
-        el('address').value='Carretera troncal del norte y 25 calle oriente #4';
-        el('validDays').value=30; el('globalDiscount').value=0; el('shipping').value=0; el('applyTax').checked=true;
-        el('date').value = todayISO(); generateQuoteCode(); recalc();
-      });
-    }
-
-    function saveQuote(){
-      if(!validate()) return;
-      const payload = { header: state.header, items: state.items, totals: state.totals, savedAt: new Date().toISOString() };
-      const key = `quote:${state.header.code}`; ls.set(key, payload);
-      Swal.fire({ icon:'success', title:'Guardado', text:`Cotización ${state.header.code} guardada en este navegador.`});
-    }
-
-    function listSavedQuotes(){
-      return Object.keys(localStorage).filter(k=>k.startsWith('quote:')).map(k=> ls.get(k)).sort((a,b)=> a.savedAt<b.savedAt?1:-1);
-    }
-
-    function loadQuoteDialog(){
-      const items = listSavedQuotes();
-      if(!items.length) return Swal.fire({ icon:'info', title:'Sin datos', text:'No hay cotizaciones guardadas.'});
-      const html = `<div class='flex flex-col gap-2 max-h-80 overflow-auto'>${items.map(q=>
-        `<button type='button' data-code='${q.header.code}' class='text-left p-3 rounded-xl border border-slate-200 hover:bg-slate-50'>
-           <div class='flex items-center justify-between'>
-             <span class='font-medium'>${q.header.code} — ${q.header.client || '(sin cliente)'}</span>
-             <span class='text-xs text-slate-500'>${new Date(q.savedAt).toLocaleString()}</span>
-           </div>
-           <div class='text-xs text-slate-500 mt-1'>${q.header.date} • ${q.items.length} ítem(s) • Total ${fmt.format(q.totals.grand)}</div>
-         </button>`).join('')}</div>`;
-      Swal.fire({ title:'Cargar cotización', html, width:700, didOpen:()=>{
-        Swal.getHtmlContainer().querySelectorAll('button[data-code]').forEach(btn=>{
-          btn.addEventListener('click', ()=>{ loadQuoteByCode(btn.getAttribute('data-code')); Swal.close(); });
-        });
-      }});
-    }
-
-    function loadQuoteByCode(code){
-      const q = ls.get(`quote:${code}`);
-      if(!q) return Swal.fire({ icon:'error', title:'No encontrada', text:`No existe ${code}.`});
-      el('code').value=q.header.code; el('date').value=q.header.date; el('client').value=q.header.client; el('advisor').value=q.header.advisor; el('address').value=q.header.address; el('validDays').value=q.header.validDays; el('notes').value=q.header.notes||'';
-      el('globalDiscount').value=q.totals?.globalDiscount ?? 0; el('shipping').value=q.totals?.shipping ?? 0; el('applyTax').checked= q.totals?.applyTax ?? true;
-      const tbody = document.getElementById('tbody'); tbody.innerHTML=''; (q.items||[]).forEach(addRow); recalc();
-    }
-
-    function exportJSON(){
-      if(!validate()) return;
-      const payload = { header: state.header, items: state.items, totals: state.totals };
-      const blob = new Blob([JSON.stringify(payload,null,2)], { type:'application/json' });
-      const url = URL.createObjectURL(blob); const a = document.createElement('a');
-      a.href=url; a.download=`cotizacion-${state.header.code}.json`; a.click(); URL.revokeObjectURL(url);
-    }
-
-    function importJSON(e){
-      const file = e.target.files?.[0]; if(!file) return; const reader = new FileReader();
-      reader.onload = ()=>{ try{ const q = JSON.parse(reader.result);
-        if(!q.header || !Array.isArray(q.items)) throw new Error('Formato inválido');
-        el('code').value = q.header.code || el('code').value; el('date').value = q.header.date || todayISO(); el('client').value=q.header.client||''; el('advisor').value=q.header.advisor||'TECMA'; el('address').value=q.header.address||'Carretera troncal del norte y 25 calle oriente #4'; el('validDays').value=q.header.validDays??30; el('notes').value=q.header.notes||'';
-        el('globalDiscount').value=q.totals?.globalDiscount ?? 0; el('shipping').value=q.totals?.shipping ?? 0; el('applyTax').checked=q.totals?.applyTax ?? true;
-        const tbody = document.getElementById('tbody'); tbody.innerHTML=''; (q.items||[]).forEach(addRow); recalc();
-        Swal.fire({ icon:'success', title:'Importado', text:'Cotización importada correctamente.'}); e.target.value='';
-      }catch(err){ Swal.fire({ icon:'error', title:'Error al importar', text: err.message }); } };
-      reader.readAsText(file);
-    }
-
-    /* ===== Quick Add (móvil) ===== */
     function openQuickAdd(){
       const html = `
         <div class='grid gap-3'>
@@ -607,27 +471,33 @@
       });
     }
 
-    /* ===== PDF (header y tablas con #3a5998 + fotos a media página) ===== */
+    /* ========= PDF ========= */
     async function generatePDF(){
       if(!validate()) return;
 
-      // asegurar items/fotos actualizados
       readItems();
 
       const { jsPDF } = window.jspdf;
       const doc = new jsPDF({ orientation:'portrait', unit:'mm', format:'a4' });
       const h = state.header, t = state.totals, items = state.items;
 
-      /* Header */
-      doc.setFillColor(BRAND.r, BRAND.g, BRAND.b);
-      doc.rect(0,0,210,28,'F');
+      let logoPng;
+      try { logoPng = await svgToPngDataURL(document.getElementById('tecmaLogo'), 300, 180); } catch {}
 
-      try{
-        const logoSvgEl = document.getElementById('tecmaLogo');
-        const logoPng = await svgToPngDataURL(logoSvgEl, 500, 380);
-        doc.addImage(logoPng, 'PNG', 10, 5, 30, 18);
-      }catch{}
+      // Footer con barra, tel a la izq y "TÉCNICOS EN MAQUINARIA" a la der
+      const drawFooter = () => {
+        const pageH = 297, fh = 18, yTop = pageH - fh;
+        doc.setFillColor(BRAND.r, BRAND.g, BRAND.b);
+        doc.rect(0, yTop, 210, fh, 'F');
+        doc.setTextColor(255,255,255);
+        doc.setFont('helvetica','bold'); doc.setFontSize(12);
+        doc.text('7558-7258', 10, yTop + fh/2 + 4);
+        doc.text('TÉCNICOS EN MAQUINARIA', 200, yTop + fh/2 + 4, { align:'right' });
+      };
 
+      // Header
+      doc.setFillColor(BRAND.r, BRAND.g, BRAND.b); doc.rect(0,0,210,28,'F');
+      if (logoPng) doc.addImage(logoPng, 'PNG', 10, 5, 30, 18);
       doc.setTextColor(255,255,255);
       doc.setFontSize(16); doc.text('COTIZACIÓN', 50, 12);
       doc.setFontSize(11); doc.text(`Código: ${h.code}`, 50, 20);
@@ -636,29 +506,26 @@
       doc.text(`Validez: ${h.validDays} días`, 200, 15, { align:'right' });
       doc.text(`Asesor: ${h.advisor}`, 200, 20, { align:'right' });
 
-      /* Cliente */
+      // Cliente
       doc.setTextColor(0,0,0); doc.setFontSize(11);
       const left = 10, top = 38; doc.text(`Cliente: ${h.client}`, left, top);
       if(h.address) doc.text(`Dirección: ${h.address}`, left, top+6);
 
-      /* Tabla de ítems */
+      // Tabla
       const head = [['SKU','Descripción','Cant.','P.Unit','Desc.%','Total']];
       const body = items.map(it=>[ it.sku||'-', it.desc, String(it.qty), fmt.format(it.unit), `${(it.disc||0).toFixed(2)}%`, fmt.format(it.total) ]);
       doc.autoTable({
         head, body, startY: 52,
         styles:{ fontSize:9, halign:'center' },
         columnStyles:{ 1:{halign:'left'}, 3:{halign:'right'}, 5:{halign:'right'} },
-        headStyles:{ fillColor: BRAND_RGB, textColor: 255 }
+        headStyles:{ fillColor: BRAND_RGB, textColor: 255 },
+        didDrawPage: () => drawFooter()
       });
 
-      /* Resumen a la derecha */
+      // Resumen
       const y = doc.lastAutoTable.finalY + 6;
-      const sumW = 100;                     // ancho de la tabla resumen
-      const sumX = 210 - 10 - sumW;         // margen derecho 10mm
-
-      doc.setFontSize(11); doc.setTextColor(0,0,0);
-      doc.text('Resumen', sumX, y);
-
+      const sumW = 100, sumX = 210 - 10 - sumW;
+      doc.setFontSize(11); doc.setTextColor(0,0,0); doc.text('Resumen', sumX, y);
       doc.autoTable({
         head:[['Concepto','Monto']],
         body:[
@@ -674,10 +541,11 @@
         styles:{ halign:'right' },
         columnStyles:{0:{halign:'left'}},
         theme:'grid',
-        headStyles:{ fillColor: BRAND_RGB, textColor: 255 }
+        headStyles:{ fillColor: BRAND_RGB, textColor: 255 },
+        didDrawPage: () => drawFooter()
       });
 
-      /* Notas y firmas */
+      // Notas y firmas
       let y2 = Math.max(y+2, doc.lastAutoTable.finalY) + 8;
       if(h.notes){
         doc.setFontSize(10); doc.text('Notas / Términos:', 10, y2);
@@ -686,11 +554,11 @@
       }
       doc.setFontSize(10); doc.text('Firma del Cliente', 25, y2+25); doc.text('Firma del Vendedor', 135, y2+25);
       doc.line(20, y2+20, 90, y2+20); doc.line(130, y2+20, 200, y2+20);
+      drawFooter();
 
-      /* FOTOS DE REFERENCIA (una por página, media página) */
+      // Fotos de referencia (una por página, media página)
       try{
-        const withPhotos = items
-          .map((it, idx) => ({...it, idx}))
+        const withPhotos = items.map((it, idx) => ({...it, idx}))
           .filter(it => it.photo && /^data:image\/(jpeg|png)/i.test(it.photo));
 
         for (const it of withPhotos) {
@@ -700,11 +568,7 @@
           doc.setTextColor(255,255,255); doc.setFontSize(13);
           doc.text(`FOTO DE REFERENCIA #${it.idx+1}`, 10, 12);
 
-          const marginL = 10, marginR = 10;
-          const maxW = 210 - marginL - marginR; // 190mm
-          const maxH = 130;                      // ~media página
-          const topY = 30;
-
+          const maxW = 190, maxH = 130, topY = 30;
           const { w:nw, h:nh } = await getImageSizeFromDataURL(it.photo);
           const scale = Math.min(maxW/nw, maxH/nh);
           const drawW = Math.max(10, nw*scale), drawH = Math.max(10, nh*scale);
@@ -718,13 +582,84 @@
           const desc = `#${it.idx+1} • ${it.desc || '-'}`;
           const wrapped = doc.splitTextToSize(desc, 190);
           doc.text(wrapped, 10, yImg + drawH + 10);
+
+          drawFooter();
         }
       }catch{}
 
       doc.save(`cotizacion-${h.code}.pdf`);
     }
 
-    /* GO */
+    // Nueva cotización: limpiar y enfocar cliente
+    function newQuote(){
+      Swal.fire({ icon:'question', title:'¿Nueva cotización?', text:'Se limpiará el formulario actual.', showCancelButton:true, confirmButtonText:'Sí, continuar', cancelButtonText:'Cancelar' }).then(r=>{
+        if(!r.isConfirmed) return;
+        document.getElementById('tbody').innerHTML = '';
+        addRow({}, false); // no enfocar descripción
+        ['client','notes'].forEach(id=> el(id).value='');
+        el('advisor').value='TECMA';
+        el('address').value='Carretera troncal del norte y 25 calle oriente #4';
+        el('validDays').value=30; el('globalDiscount').value=0; el('shipping').value=0; el('applyTax').checked=true;
+        el('date').value = todayISO(); generateQuoteCode(); recalc();
+        setTimeout(()=> el('client').focus(), 0); // enfocar cliente
+      });
+    }
+
+    // Guardar / cargar / exportar / importar (sin cambios funcionales)
+    function saveQuote(){
+      if(!validate()) return;
+      const payload = { header: state.header, items: state.items, totals: state.totals, savedAt: new Date().toISOString() };
+      const key = `quote:${state.header.code}`; ls.set(key, payload);
+      Swal.fire({ icon:'success', title:'Guardado', text:`Cotización ${state.header.code} guardada en este navegador.`});
+    }
+    function listSavedQuotes(){
+      return Object.keys(localStorage).filter(k=>k.startsWith('quote:')).map(k=> ls.get(k)).sort((a,b)=> a.savedAt<b.savedAt?1:-1);
+    }
+    function loadQuoteDialog(){
+      const items = listSavedQuotes();
+      if(!items.length) return Swal.fire({ icon:'info', title:'Sin datos', text:'No hay cotizaciones guardadas.'});
+      const html = `<div class='flex flex-col gap-2 max-h-80 overflow-auto'>${items.map(q=>
+        `<button type='button' data-code='${q.header.code}' class='text-left p-3 rounded-xl border border-slate-200 hover:bg-slate-50'>
+           <div class='flex items-center justify-between'>
+             <span class='font-medium'>${q.header.code} — ${q.header.client || '(sin cliente)'}</span>
+             <span class='text-xs text-slate-500'>${new Date(q.savedAt).toLocaleString()}</span>
+           </div>
+           <div class='text-xs text-slate-500 mt-1'>${q.header.date} • ${q.items.length} ítem(s) • Total ${fmt.format(q.totals.grand)}</div>
+         </button>`).join('')}</div>`;
+      Swal.fire({ title:'Cargar cotización', html, width:700, didOpen:()=>{
+        Swal.getHtmlContainer().querySelectorAll('button[data-code]').forEach(btn=>{
+          btn.addEventListener('click', ()=>{ loadQuoteByCode(btn.getAttribute('data-code')); Swal.close(); });
+        });
+      }});
+    }
+    function loadQuoteByCode(code){
+      const q = ls.get(`quote:${code}`);
+      if(!q) return Swal.fire({ icon:'error', title:'No encontrada', text:`No existe ${code}.`});
+      el('code').value=q.header.code; el('date').value=q.header.date; el('client').value=q.header.client; el('advisor').value=q.header.advisor; el('address').value=q.header.address; el('validDays').value=q.header.validDays; el('notes').value=q.header.notes||'';
+      el('globalDiscount').value=q.totals?.globalDiscount ?? 0; el('shipping').value=q.totals?.shipping ?? 0; el('applyTax').checked= q.totals?.applyTax ?? true;
+      const tbody = document.getElementById('tbody'); tbody.innerHTML=''; (q.items||[]).forEach(row=>addRow(row,false)); recalc();
+      setTimeout(()=> el('client').focus(), 0);
+    }
+    function exportJSON(){
+      if(!validate()) return;
+      const payload = { header: state.header, items: state.items, totals: state.totals };
+      const blob = new Blob([JSON.stringify(payload,null,2)], { type:'application/json' });
+      const url = URL.createObjectURL(blob); const a = document.createElement('a');
+      a.href=url; a.download=`cotizacion-${state.header.code}.json`; a.click(); URL.revokeObjectURL(url);
+    }
+    function importJSON(e){
+      const file = e.target.files?.[0]; if(!file) return; const reader = new FileReader();
+      reader.onload = ()=>{ try{ const q = JSON.parse(reader.result);
+        if(!q.header || !Array.isArray(q.items)) throw new Error('Formato inválido');
+        el('code').value = q.header.code || el('code').value; el('date').value = q.header.date || todayISO(); el('client').value=q.header.client||''; el('advisor').value=q.header.advisor||'TECMA'; el('address').value=q.header.address||'Carretera troncal del norte y 25 calle oriente #4'; el('validDays').value=q.header.validDays??30; el('notes').value=q.header.notes||'';
+        el('globalDiscount').value=q.totals?.globalDiscount ?? 0; el('shipping').value=q.totals?.shipping ?? 0; el('applyTax').checked=q.totals?.applyTax ?? true;
+        const tbody = document.getElementById('tbody'); tbody.innerHTML=''; (q.items||[]).forEach(row=>addRow(row,false)); recalc();
+        Swal.fire({ icon:'success', title:'Importado', text:'Cotización importada correctamente.'}); e.target.value='';
+        setTimeout(()=> el('client').focus(), 0);
+      }catch(err){ Swal.fire({ icon:'error', title:'Error al importar', text: err.message }); } };
+      reader.readAsText(file);
+    }
+
     init();
   </script>
 </body>
