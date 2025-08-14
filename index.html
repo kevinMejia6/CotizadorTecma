@@ -41,6 +41,9 @@
       table.responsive td::before{ content: attr(data-label); font-size:.75rem; color:#64748b; }
       table.responsive td[data-actions]{ justify-content:flex-end; }
     }
+
+    /* Miniatura */
+    .photo-preview{ max-width: 2.5rem; max-height: 2.5rem; }
   </style>
 </head>
 <body class="bg-gradient-to-b from-slate-50 to-slate-100 text-slate-800 min-h-screen selection:bg-brand/10" data-theme="light">
@@ -56,7 +59,7 @@
           <text x="200" y="140" font-family="Arial, sans-serif" font-size="14" text-anchor="middle" fill="white" letter-spacing="2px">TÉCNICOS EN MAQUINARIA</text>
           <line x1="120" y1="155" x2="280" y2="155" stroke="white" stroke-width="2"/>
         </svg>
-        <h1 class="text-2xl sm:text-3xl font-extrabold tracking-tight text-brand">Cotizador</h1>
+        <h1 class="text-2xl sm:text-3xl font-extrabold tracking-tight text-brand">Cotizador TECMA</h1>
       </div>
       <div class="no-print flex flex-wrap items-center gap-2">
         <button id="toggleTheme" class="inline-flex h-10 w-10 items-center justify-center rounded-xl border border-slate-200 hover:bg-slate-50 active:scale-[.99]" title="Tema claro/oscuro"><i class="bi bi-moon-stars"></i></button>
@@ -115,7 +118,7 @@
           </div>
         </div>
         <div class="overflow-x-auto rounded-2xl ring-1 ring-slate-200">
-          <table class="responsive min-w-[860px] w-full text-sm" id="productTable">
+          <table class="responsive min-w-[980px] w-full text-sm" id="productTable">
             <thead class="sticky">
               <tr class="bg-slate-800 text-white">
                 <th class="px-3 py-2 text-left">SKU</th>
@@ -123,6 +126,7 @@
                 <th class="px-3 py-2 text-left">Descripción</th>
                 <th class="px-3 py-2 text-right">P.Unit</th>
                 <th class="px-3 py-2 text-right">Desc. %</th>
+                <th class="px-3 py-2 text-left">Foto</th><!-- NUEVA COLUMNA -->
                 <th class="px-3 py-2 text-right">Total</th>
                 <th class="px-2 py-2 w-10 no-print"></th>
               </tr>
@@ -296,6 +300,52 @@
       tbody.addEventListener('input', (e)=>{ const tr = e.target.closest('tr'); if(tr){ calcRow(tr); recalc(); } });
       tbody.addEventListener('click', (e)=>{ const btn = e.target.closest('.del-row'); if(btn){ removeRow(btn.closest('tr')); } });
 
+      // === FOTO: abrir selector con el botón cámara
+      tbody.addEventListener('click', (e) => {
+        const btn = e.target.closest('.photo-btn');
+        if (btn) {
+          const tr = btn.closest('tr');
+          tr.querySelector('.photo-input').click();
+        }
+        const img = e.target.closest('.photo-preview');
+        if (img) {
+          Swal.fire({
+            imageUrl: img.src,
+            imageAlt: 'Foto de referencia',
+            showConfirmButton: false,
+            showCloseButton: true,
+            width: Math.min(700, window.innerWidth - 40)
+          });
+        }
+      });
+
+      // === FOTO: convertir archivo a DataURL y mostrar miniatura
+      tbody.addEventListener('change', async (e) => {
+        const input = e.target.closest('.photo-input');
+        if (!input) return;
+        const tr = input.closest('tr');
+        const file = input.files?.[0];
+        if (!file) return;
+
+        // Límite opcional 2MB
+        const MAX = 2 * 1024 * 1024;
+        if (file.size > MAX) {
+          Swal.fire({ icon:'warning', title:'Imagen muy grande', text:'Elige una imagen menor a 2MB.' });
+          input.value = '';
+          return;
+        }
+
+        const reader = new FileReader();
+        reader.onload = () => {
+          const dataUrl = reader.result; // base64
+          tr.querySelector('.photo-data').value = dataUrl;
+          const img = tr.querySelector('.photo-preview');
+          img.src = dataUrl;
+          img.classList.remove('hidden');
+        };
+        reader.readAsDataURL(file);
+      });
+
       // Totales y header
       el('applyTax').addEventListener('change', recalc);
       el('globalDiscount').addEventListener('input', recalc);
@@ -318,6 +368,19 @@
         <td class="px-3 py-2" data-label="Descripción"><input class="cell-input desc" placeholder="Descripción" /></td>
         <td class="px-3 py-2" data-label="P. Unit"><input type="number" min="0" step="0.01" class="cell-input unit text-right" inputmode="decimal" /></td>
         <td class="px-3 py-2" data-label="Desc. %"><input type="number" min="0" max="100" step="0.01" class="cell-input disc text-right" value="0" inputmode="decimal" /></td>
+
+        <!-- FOTO opcional -->
+        <td class="px-3 py-2" data-label="Foto">
+          <div class="flex items-center gap-2">
+            <button class="btn-icon photo-btn" type="button" title="Agregar foto">
+              <i class="bi bi-camera"></i>
+            </button>
+            <input type="file" accept="image/*" class="photo-input hidden">
+            <input type="hidden" class="photo-data" />
+            <img class="photo-preview h-10 w-10 rounded object-cover hidden" alt="Foto" />
+          </div>
+        </td>
+
         <td class="px-3 py-2" data-label="Total"><input class="cell-input total text-right font-medium" readonly /></td>
         <td class="px-2 py-2 text-center no-print" data-actions>
           <button class="btn-icon del-row" type="button" title="Eliminar fila"><i class="bi bi-trash"></i></button>
@@ -330,6 +393,15 @@
       tr.querySelector('.unit').value = data.unit ?? '';
       tr.querySelector('.disc').value = data.disc ?? 0;
       tr.querySelector('.total').value = fmt.format(0);
+
+      // Restaurar foto si viene en data
+      tr.querySelector('.photo-data').value = data.photo ?? '';
+      if (data.photo) {
+        const img = tr.querySelector('.photo-preview');
+        img.src = data.photo;
+        img.classList.remove('hidden');
+      }
+
       tr.querySelector('.desc').focus();
     }
 
@@ -357,7 +429,8 @@
           desc: tr.querySelector('.desc').value.trim(),
           unit: Number(tr.querySelector('.unit').value)||0,
           disc: Math.min(100, Math.max(0, Number(tr.querySelector('.disc').value)||0)),
-          total: unfmt(tr.querySelector('.total').value)
+          total: unfmt(tr.querySelector('.total').value),
+          photo: tr.querySelector('.photo-data')?.value || ''
         });
       });
       state.items = items; return items;
@@ -483,7 +556,7 @@
       });
     }
 
-    // ===== PDF (con logo TECMA SVG) =====
+    // ===== PDF (con logo TECMA SVG + fotos de referencia) =====
     async function generatePDF(){
       if(!validate()) return;
       const { jsPDF } = window.jspdf; const doc = new jsPDF({ orientation:'portrait', unit:'mm', format:'a4' });
@@ -522,6 +595,47 @@
       let y2 = Math.max(y+2, doc.lastAutoTable.finalY) + 8;
       if(h.notes){ doc.setFontSize(10); doc.text('Notas / Términos:', 10, y2); doc.setFontSize(9); const split = doc.splitTextToSize(h.notes, 180); doc.text(split, 10, y2+5); y2 += 5 + (split.length * 5); }
       doc.setFontSize(10); doc.text('Firma del Cliente', 25, y2+25); doc.text('Firma del Vendedor', 135, y2+25); doc.line(20, y2+20, 90, y2+20); doc.line(130, y2+20, 200, y2+20);
+
+      // === FOTOS DE REFERENCIA (opcional) ===
+      try {
+        const withPhotos = items
+          .map((it, idx) => ({...it, idx}))
+          .filter(it => it.photo && /^data:image\//.test(it.photo));
+
+        if (withPhotos.length) {
+          doc.addPage();
+          doc.setFillColor(37,99,235);
+          doc.rect(0,0,210,20,'F');
+          doc.setTextColor(255,255,255);
+          doc.setFontSize(13);
+          doc.text('FOTOS DE REFERENCIA', 10, 12);
+
+          doc.setTextColor(0,0,0);
+          const cellW = 45, cellH = 45; // tamaño de miniatura
+          const marginL = 10, marginT = 28, gapX = 8, gapY = 18;
+          const perRow = 4;
+
+          withPhotos.forEach((it, i) => {
+            const row = Math.floor(i / perRow);
+            const col = i % perRow;
+            const x = marginL + col * (cellW + gapX);
+            const y = marginT + row * (cellH + gapY);
+
+            // Marco
+            doc.setDrawColor(230,230,230);
+            doc.rect(x, y, cellW, cellH);
+
+            // Imagen
+            try { doc.addImage(it.photo, 'PNG', x+1, y+1, cellW-2, cellH-2); }
+            catch { try { doc.addImage(it.photo, 'JPEG', x+1, y+1, cellW-2, cellH-2); } catch{} }
+
+            // Texto inferior: índice + primera parte de la descripción
+            doc.setFontSize(9);
+            const label = `#${it.idx+1} • ${String(it.desc||'-').slice(0,30)}`;
+            doc.text(label, x, y + cellH + 5);
+          });
+        }
+      } catch {}
 
       doc.save(`cotizacion-${h.code}.pdf`);
     }
