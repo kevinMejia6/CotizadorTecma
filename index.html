@@ -1,781 +1,414 @@
 <!DOCTYPE html>
 <html lang="es" class="scroll-smooth">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Cotizador — UI móvil moderna (TECMA)</title>
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Cotizador — UI móvil moderna (TECMA)</title>
 
-    <!-- TailwindCSS -->
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script>
-      tailwind.config = {
-        darkMode: ["class", '[data-theme="dark"]'],
-        theme: {
-          extend: {
-            colors: { brand: { DEFAULT: "#3a5998", 700: "#2a437f" } },
-            boxShadow: { soft: "0 10px 25px -10px rgba(2,6,23,.15)" },
-          },
-        },
-      };
-    </script>
-
-    <!-- Iconos -->
-    <link
-      href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css"
-      rel="stylesheet"
-    />
-
-    <!-- SweetAlert2 / jsPDF -->
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.4/jspdf.plugin.autotable.min.js"></script>
-
-    <style>
-      thead.sticky th {
-        position: sticky;
-        top: 0;
-        z-index: 1;
-      }
-      input[type="number"]::-webkit-inner-spin-button,
-      input[type="number"]::-webkit-outer-spin-button {
-        -webkit-appearance: none;
-        margin: 0;
-      }
-      input[type="number"] {
-        -moz-appearance: textfield;
-      }
-      @media print {
-        .no-print {
-          display: none !important;
+  <!-- TailwindCSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: ['class', '[data-theme="dark"]'],
+      theme: {
+        extend: {
+          colors: { brand: { DEFAULT:'#3a5998', 700:'#2a437f' } },
+          boxShadow: { soft: '0 10px 25px -10px rgba(2,6,23,.15)' }
         }
       }
+    };
+  </script>
 
-      /* Tabla -> tarjetas en móviles */
-      @media (max-width: 640px) {
-        table.responsive {
-          display: block;
-        }
-        table.responsive thead {
-          display: none;
-        }
-        table.responsive tbody {
-          display: block;
-        }
-        table.responsive tr {
-          display: block;
-          background: white;
-          border: 1px solid #e5e7eb;
-          border-radius: 14px;
-          margin: 10px 0;
-          padding: 10px;
-          box-shadow: 0 8px 20px -12px rgba(2, 6, 23, 0.15);
-        }
-        table.responsive td {
-          display: flex;
-          align-items: center;
-          justify-content: space-between;
-          gap: 0.75rem;
-          padding: 0.5rem 0.75rem;
-          border-bottom: 1px dashed #e5e7eb;
-        }
-        table.responsive td:last-child {
-          border-bottom: 0;
-        }
-        table.responsive td::before {
-          content: attr(data-label);
-          font-size: 0.75rem;
-          color: #64748b;
-        }
-        table.responsive td[data-actions] {
-          justify-content: flex-end;
-        }
-      }
+  <!-- Iconos -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
 
-      .photo-preview {
-        max-width: 2.5rem;
-        max-height: 2.5rem;
-      }
+  <!-- SweetAlert2 / jsPDF -->
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.4/jspdf.plugin.autotable.min.js"></script>
 
-      /* Encabezados de tabla HTML con color corporativo */
-      #productTable thead tr {
-        background: #3a5998 !important;
-      }
-      #productTable thead th {
-        color: #fff !important;
-      }
+  <style>
+    thead.sticky th{ position:sticky; top:0; z-index:1; }
+    input[type=number]::-webkit-inner-spin-button,input[type=number]::-webkit-outer-spin-button{ -webkit-appearance:none; margin:0; }
+    input[type=number]{ -moz-appearance:textfield; }
+    @media print{ .no-print{ display:none !important } }
 
-      /* Helpers de UI */
-      .card {
-        background: #fff;
-        border-radius: 16px;
-        box-shadow: 0 10px 25px -12px rgba(2, 6, 23, 0.15);
-        border: 1px solid #e5e7eb;
-        overflow: hidden;
-      }
-      .label {
-        display: block;
-        font-size: 0.875rem;
-        font-weight: 500;
-        color: #334155;
-        margin-bottom: 0.25rem;
-      }
-      .input {
-        width: 100%;
-        border-radius: 12px;
-        border: 1px solid #cbd5e1;
-        background: #fff;
-        padding: 0.5rem 0.75rem;
-        font-size: 0.875rem;
-        box-shadow: inset 0 1px 2px rgba(2, 6, 23, 0.03);
-        outline: none;
-      }
-      .input:focus {
-        border-color: #3a5998;
-        box-shadow: 0 0 0 4px rgba(58, 89, 152, 0.18),
-          inset 0 1px 2px rgba(2, 6, 23, 0.03);
-      }
-      .btn-primary {
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        gap: 0.5rem;
-        border-radius: 12px;
-        background: #3a5998;
-        padding: 0.5rem 1rem;
-        font-size: 0.875rem;
-        font-weight: 600;
-        color: white;
-        box-shadow: 0 8px 20px -12px rgba(58, 89, 152, 0.55);
-      }
-      .btn-primary:hover {
-        background: #2a437f;
-      }
-      .btn-secondary {
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        gap: 0.5rem;
-        border-radius: 12px;
-        border: 1px solid #cbd5e1;
-        background: #fff;
-        padding: 0.5rem 1rem;
-        font-size: 0.875rem;
-        font-weight: 600;
-        color: #334155;
-      }
-      .btn-secondary:hover {
-        background: #f8fafc;
-      }
-      .btn-danger {
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        gap: 0.5rem;
-        border-radius: 12px;
-        background: #e11d48;
-        padding: 0.5rem 1rem;
-        font-size: 0.875rem;
-        font-weight: 600;
-        color: white;
-      }
-      .btn-icon {
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        border-radius: 8px;
-        border: 1px solid #cbd5e1;
-        background: #fff;
-        padding: 0.5rem;
-        color: #334155;
-      }
-      .cell-input {
-        width: 100%;
-        border-radius: 10px;
-        border: 1px solid #cbd5e1;
-        background: #fff;
-        padding: 0.375rem 0.5rem;
-        font-size: 0.875rem;
-      }
-      .cell-input:focus {
-        border-color: #3a5998;
-        box-shadow: 0 0 0 3px rgba(58, 89, 152, 0.18);
-        outline: none;
-      }
-    </style>
-  </head>
-  <body
-    class="bg-gradient-to-b from-slate-50 to-slate-100 text-slate-800 min-h-screen selection:bg-brand/10"
-    data-theme="light"
-  >
-    <div class="max-w-7xl mx-auto p-4 sm:p-6">
-      <!-- Header -->
-      <header
-        class="bg-white/90 backdrop-blur rounded-2xl shadow-soft ring-1 ring-slate-200 p-4 sm:p-6 flex flex-col md:flex-row md:items-center md:justify-between gap-3"
-      >
-        <div class="flex items-center gap-3">
-          <!-- Logo TECMA (SVG inline para la UI) -->
-          <svg
-            id="tecmaLogo"
-            viewBox="0 0 400 240"
-            xmlns="http://www.w3.org/2000/svg"
-            class="h-10 w-auto select-none"
-          >
-            <rect
-              x="0"
-              y="0"
-              width="400"
-              height="240"
-              rx="20"
-              ry="20"
-              fill="#3a5998"
-            />
-            <text
-              x="200"
-              y="110"
-              font-family="Arial, sans-serif"
-              font-size="48"
-              font-weight="bold"
-              text-anchor="middle"
-              fill="white"
-            >
-              TECMA
-            </text>
-            <text
-              x="200"
-              y="140"
-              font-family="Arial, sans-serif"
-              font-size="14"
-              text-anchor="middle"
-              fill="white"
-              letter-spacing="2px"
-            >
-              TÉCNICOS EN MAQUINARIA
-            </text>
-          </svg>
-          <h1
-            class="text-2xl sm:text-3xl font-extrabold tracking-tight text-brand"
-          >
-            Cotizador TECMA
-          </h1>
-        </div>
-        <div class="no-print flex flex-wrap items-center gap-2">
-          <button
-            id="toggleTheme"
-            class="inline-flex h-10 w-10 items-center justify-center rounded-xl border border-slate-200 hover:bg-slate-50 active:scale-[.99]"
-            title="Tema claro/oscuro"
-          >
-            <i class="bi bi-moon-stars"></i>
-          </button>
-          <button id="btn-new" class="btn-secondary">
-            <i class="bi bi-file-earmark-plus"></i
-            ><span class="hidden sm:inline"> Nueva</span>
-          </button>
-          <button id="btn-save" class="btn-primary">
-            <i class="bi bi-save2"></i
-            ><span class="hidden sm:inline"> Guardar</span>
-          </button>
-          <button id="btn-load" class="btn-secondary">
-            <i class="bi bi-folder2-open"></i
-            ><span class="hidden sm:inline"> Cargar</span>
-          </button>
-          <button id="btn-export-json" class="btn-secondary">
-            <i class="bi bi-download"></i
-            ><span class="hidden sm:inline"> Exportar</span>
-          </button>
-          <label class="btn-secondary cursor-pointer"
-            ><i class="bi bi-upload"></i
-            ><span class="hidden sm:inline"> Importar</span>
-            <input
-              type="file"
-              id="import-json"
-              accept="application/json"
-              hidden
-            />
-          </label>
-          <button id="generatePdf" class="btn-danger">
-            <i class="bi bi-filetype-pdf"></i
-            ><span class="hidden sm:inline"> PDF</span>
-          </button>
-        </div>
-      </header>
+    /* Tabla -> tarjetas en móviles */
+    @media (max-width: 640px){
+      table.responsive{ display:block; }
+      table.responsive thead{ display:none; }
+      table.responsive tbody{ display:block; }
+      table.responsive tr{ display:block; background:white; border:1px solid #e5e7eb; border-radius:14px; margin:10px 0; padding:10px; box-shadow: 0 8px 20px -12px rgba(2,6,23,.15); }
+      table.responsive td{ display:flex; align-items:center; justify-content:space-between; gap:.75rem; padding:.5rem .75rem; border-bottom:1px dashed #e5e7eb; }
+      table.responsive td:last-child{ border-bottom:0; }
+      table.responsive td::before{ content: attr(data-label); font-size:.75rem; color:#64748b; }
+      table.responsive td[data-actions]{ justify-content:flex-end; }
+    }
 
-      <!-- Datos principales -->
-      <section class="card mt-6">
-        <div class="p-4 sm:p-6">
-          <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-            <div>
-              <label for="code" class="label">Código</label>
-              <input id="code" class="input" readonly />
-              <p class="text-xs text-slate-500 mt-1">
-                Autogenerado por fecha + consecutivo diario
-              </p>
-            </div>
-            <div>
-              <label for="date" class="label">Fecha</label>
-              <input id="date" type="date" class="input" />
-            </div>
-            <div>
-              <label for="client" class="label">Cliente</label>
-              <input
-                id="client"
-                class="input"
-                placeholder="Nombre o empresa"
-                autocomplete="name"
-              />
-            </div>
-            <div>
-              <label for="advisor" class="label">Asesor</label>
-              <input id="advisor" class="input" value="TECMA" />
-            </div>
-            <div class="sm:col-span-2 lg:col-span-3">
-              <label for="address" class="label">Dirección</label>
-              <input
-                id="address"
-                class="input"
-                value="Carretera troncal del norte y 25 calle oriente #4"
-                autocomplete="street-address"
-              />
-            </div>
-            <div>
-              <label for="validDays" class="label">Validez (días)</label>
-              <input
-                id="validDays"
-                type="number"
-                min="1"
-                class="input"
-                value="30"
-                inputmode="numeric"
-              />
-            </div>
+    .photo-preview{ max-width: 2.5rem; max-height: 2.5rem; }
+
+    /* Encabezados de tabla HTML con color corporativo */
+    #productTable thead tr { background:#3a5998 !important; }
+    #productTable thead th { color:#fff !important; }
+
+    /* Helpers de UI */
+    .card{ background:#fff; border-radius:16px; box-shadow:0 10px 25px -12px rgba(2,6,23,.15); border:1px solid #e5e7eb; overflow:hidden; }
+    .label{ display:block; font-size:.875rem; font-weight:500; color:#334155; margin-bottom:.25rem; }
+    .input{ width:100%; border-radius:12px; border:1px solid #cbd5e1; background:#fff; padding:.5rem .75rem; font-size:.875rem; box-shadow: inset 0 1px 2px rgba(2,6,23,.03); outline: none; }
+    .input:focus{ border-color:#3a5998; box-shadow: 0 0 0 4px rgba(58,89,152,.18), inset 0 1px 2px rgba(2,6,23,.03); }
+    .btn-primary{ display:inline-flex; align-items:center; justify-content:center; gap:.5rem; border-radius:12px; background:#3a5998; padding:.5rem 1rem; font-size:.875rem; font-weight:600; color:white; box-shadow:0 8px 20px -12px rgba(58,89,152,.55); }
+    .btn-primary:hover{ background:#2a437f; }
+    .btn-secondary{ display:inline-flex; align-items:center; justify-content:center; gap:.5rem; border-radius:12px; border:1px solid #cbd5e1; background:#fff; padding:.5rem 1rem; font-size:.875rem; font-weight:600; color:#334155; }
+    .btn-secondary:hover{ background:#f8fafc; }
+    .btn-danger{ display:inline-flex; align-items:center; justify-content:center; gap:.5rem; border-radius:12px; background:#e11d48; padding:.5rem 1rem; font-size:.875rem; font-weight:600; color:white; }
+    .btn-icon{ display:inline-flex; align-items:center; justify-content:center; border-radius:8px; border:1px solid #cbd5e1; background:#fff; padding:.5rem; color:#334155; }
+    .cell-input{ width:100%; border-radius:10px; border:1px solid #cbd5e1; background:#fff; padding:.375rem .5rem; font-size:.875rem; }
+    .cell-input:focus{ border-color:#3a5998; box-shadow: 0 0 0 3px rgba(58,89,152,.18); outline:none; }
+  </style>
+</head>
+<body class="bg-gradient-to-b from-slate-50 to-slate-100 text-slate-800 min-h-screen selection:bg-brand/10" data-theme="light">
+  <div class="max-w-7xl mx-auto p-4 sm:p-6">
+    <!-- Header -->
+    <header class="bg-white/90 backdrop-blur rounded-2xl shadow-soft ring-1 ring-slate-200 p-4 sm:p-6 flex flex-col md:flex-row md:items-center md:justify-between gap-3">
+      <div class="flex items-center gap-3">
+        <!-- Logo TECMA (SVG inline para la UI) -->
+        <svg id="tecmaLogo" viewBox="0 0 400 240" xmlns="http://www.w3.org/2000/svg" class="h-10 w-auto select-none">
+          <rect x="0" y="0" width="400" height="240" rx="20" ry="20" fill="#3a5998"/>
+          <text x="200" y="110" font-family="Arial, sans-serif" font-size="48" font-weight="bold" text-anchor="middle" fill="white">TECMA</text>
+          <text x="200" y="140" font-family="Arial, sans-serif" font-size="14" text-anchor="middle" fill="white" letter-spacing="2px">TÉCNICOS EN MAQUINARIA</text>
+        </svg>
+        <h1 class="text-2xl sm:text-3xl font-extrabold tracking-tight text-brand">Cotizador TECMA</h1>
+      </div>
+      <div class="no-print flex flex-wrap items-center gap-2">
+        <button id="toggleTheme" type="button" class="inline-flex h-10 w-10 items-center justify-center rounded-xl border border-slate-200 hover:bg-slate-50 active:scale-[.99]" title="Tema claro/oscuro"><i class="bi bi-moon-stars"></i></button>
+        <button id="btn-new" type="button" class="btn-secondary"><i class="bi bi-file-earmark-plus"></i><span class="hidden sm:inline"> Nueva</span></button>
+        <button id="btn-save" type="button" class="btn-primary"><i class="bi bi-save2"></i><span class="hidden sm:inline"> Guardar</span></button>
+        <button id="btn-load" type="button" class="btn-secondary"><i class="bi bi-folder2-open"></i><span class="hidden sm:inline"> Cargar</span></button>
+        <button id="btn-export-json" type="button" class="btn-secondary"><i class="bi bi-download"></i><span class="hidden sm:inline"> Exportar</span></button>
+        <label class="btn-secondary cursor-pointer"><i class="bi bi-upload"></i><span class="hidden sm:inline"> Importar</span>
+          <input type="file" id="import-json" accept="application/json" hidden>
+        </label>
+        <button id="generatePdf" type="button" class="btn-danger"><i class="bi bi-filetype-pdf"></i><span class="hidden sm:inline"> PDF</span></button>
+      </div>
+    </header>
+
+    <!-- Datos principales -->
+    <section class="card mt-6">
+      <div class="p-4 sm:p-6">
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          <div>
+            <label for="code" class="label">Código</label>
+            <input id="code" class="input" readonly>
+            <p class="text-xs text-slate-500 mt-1">Autogenerado por fecha + consecutivo diario</p>
           </div>
-        </div>
-      </section>
-
-      <!-- Productos / Servicios -->
-      <section class="card mt-6">
-        <div class="p-4 sm:p-6">
-          <div
-            class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-4"
-          >
-            <h2 class="text-lg sm:text-xl font-semibold">
-              Productos / Servicios
-            </h2>
-            <div class="flex gap-2">
-              <button id="addRow" class="btn-primary no-print">
-                <i class="bi bi-plus-circle"></i
-                ><span class="hidden sm:inline"> Añadir ítem (Ctrl+Enter)</span>
-              </button>
-              <button id="quickAdd" class="btn-secondary no-print sm:hidden">
-                <i class="bi bi-list-task"></i><span> Rápido</span>
-              </button>
-            </div>
+          <div>
+            <label for="date" class="label">Fecha</label>
+            <input id="date" type="date" class="input">
           </div>
-          <div class="overflow-x-auto rounded-2xl ring-1 ring-slate-200">
-            <table
-              class="responsive min-w-[980px] w-full text-sm"
-              id="productTable"
-            >
-              <thead class="sticky">
-                <tr>
-                  <th class="px-3 py-2 text-left">SKU</th>
-                  <th class="px-3 py-2 text-left">Cant.</th>
-                  <th class="px-3 py-2 text-left">Descripción</th>
-                  <th class="px-3 py-2 text-right">P.Unit</th>
-                  <th class="px-3 py-2 text-right">Desc. %</th>
-                  <th class="px-3 py-2 text-left">Foto</th>
-                  <th class="px-3 py-2 text-right">Total</th>
-                  <th class="px-2 py-2 w-10 no-print"></th>
-                </tr>
-              </thead>
-              <tbody
-                id="tbody"
-                class="divide-y divide-slate-200 bg-white"
-              ></tbody>
-            </table>
+          <div>
+            <label for="client" class="label">Cliente</label>
+            <input id="client" class="input" placeholder="Nombre o empresa" autocomplete="name">
           </div>
-        </div>
-      </section>
-
-      <!-- Notas y totales -->
-      <section class="grid grid-cols-1 lg:grid-cols-3 gap-4 mt-6">
-        <div class="card lg:col-span-2">
-          <div class="p-4 sm:p-6">
-            <label for="notes" class="label">Notas / Términos</label>
-            <textarea
-              id="notes"
-              rows="6"
-              class="input min-h-[120px]"
-              placeholder="Plazos, garantías, formas de pago, etc."
-            ></textarea>
+          <div>
+            <label for="advisor" class="label">Asesor</label>
+            <input id="advisor" class="input" value="TECMA">
           </div>
-        </div>
-        <div class="card">
-          <div class="p-4 sm:p-6 space-y-3">
-            <div class="flex items-center justify-between">
-              <span class="text-slate-600">Subtotal</span>
-              <input id="subtotal" class="input w-36 sm:text-right" readonly />
-            </div>
-            <div class="flex items-center justify-between">
-              <label class="inline-flex items-center gap-2 select-none">
-                <input
-                  type="checkbox"
-                  id="applyTax"
-                  class="h-4 w-4 rounded border-slate-300 text-brand focus:ring-brand"
-                  checked
-                />
-                <span>IVA 13%</span>
-              </label>
-              <input id="tax" class="input w-36 sm:text-right" readonly />
-            </div>
-            <div class="flex items-center justify-between">
-              <span class="text-slate-600">Descuento Global (%)</span>
-              <input
-                id="globalDiscount"
-                type="number"
-                min="0"
-                max="100"
-                step="0.01"
-                class="input w-36 sm:text-right"
-                value="0"
-                inputmode="decimal"
-              />
-            </div>
-            <div class="flex items-center justify-between">
-              <span class="text-slate-600">Envío / Otros</span>
-              <input
-                id="shipping"
-                type="number"
-                min="0"
-                step="0.01"
-                class="input w-36 sm:text-right"
-                value="0"
-                inputmode="decimal"
-              />
-            </div>
-            <hr class="border-slate-200" />
-            <div class="flex items-center justify-between">
-              <span class="font-semibold">Total a Pagar</span>
-              <input
-                id="grandTotal"
-                class="input w-40 sm:text-right font-semibold"
-                readonly
-              />
-            </div>
+          <div class="sm:col-span-2 lg:col-span-3">
+            <label for="address" class="label">Dirección</label>
+            <input id="address" class="input" value="Carretera troncal del norte y 25 calle oriente #4" autocomplete="street-address">
           </div>
-        </div>
-      </section>
-    </div>
-
-    <!-- Barra fija móvil -->
-    <div class="no-print fixed inset-x-0 bottom-0 sm:hidden">
-      <div
-        class="mx-4 mb-4 rounded-2xl border border-slate-200 bg-white shadow-soft"
-      >
-        <div class="flex items-center justify-between p-3">
-          <div class="text-sm">
-            <div class="text-slate-500 leading-none">Total</div>
-            <div id="stickyTotal" class="font-semibold text-lg">$0.00</div>
-          </div>
-          <div class="flex gap-2">
-            <button
-              id="fab-add"
-              class="inline-flex items-center gap-2 rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm font-medium text-slate-700 shadow-sm active:scale-[.99]"
-            >
-              <i class="bi bi-plus"></i><span>Añadir</span>
-            </button>
-            <button
-              id="fab-pdf"
-              class="inline-flex items-center gap-2 rounded-xl bg-brand px-3 py-2 text-sm font-medium text-white shadow active:scale-[.99]"
-            >
-              <i class="bi bi-filetype-pdf"></i><span>PDF</span>
-            </button>
+          <div>
+            <label for="validDays" class="label">Validez (días)</label>
+            <input id="validDays" type="number" min="1" class="input" value="30" inputmode="numeric">
           </div>
         </div>
       </div>
+    </section>
+
+    <!-- Productos / Servicios -->
+    <section class="card mt-6">
+      <div class="p-4 sm:p-6">
+        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-4">
+          <h2 class="text-lg sm:text-xl font-semibold">Productos / Servicios</h2>
+          <div class="flex gap-2">
+            <button id="addRow" type="button" class="btn-primary no-print"><i class="bi bi-plus-circle"></i><span class="hidden sm:inline"> Añadir ítem (Ctrl+Enter)</span></button>
+            <button id="quickAdd" type="button" class="btn-secondary no-print sm:hidden"><i class="bi bi-list-task"></i><span> Rápido</span></button>
+          </div>
+        </div>
+        <div class="overflow-x-auto rounded-2xl ring-1 ring-slate-200">
+          <table class="responsive min-w-[980px] w-full text-sm" id="productTable">
+            <thead class="sticky">
+              <tr>
+                <th class="px-3 py-2 text-left">SKU</th>
+                <th class="px-3 py-2 text-left">Cant.</th>
+                <th class="px-3 py-2 text-left">Descripción</th>
+                <th class="px-3 py-2 text-right">P.Unit</th>
+                <th class="px-3 py-2 text-right">Desc. %</th>
+                <th class="px-3 py-2 text-left">Foto</th>
+                <th class="px-3 py-2 text-right">Total</th>
+                <th class="px-2 py-2 w-10 no-print"></th>
+              </tr>
+            </thead>
+            <tbody id="tbody" class="divide-y divide-slate-200 bg-white"></tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- Notas y totales -->
+    <section class="grid grid-cols-1 lg:grid-cols-3 gap-4 mt-6">
+      <div class="card lg:col-span-2">
+        <div class="p-4 sm:p-6">
+          <label for="notes" class="label">Notas / Términos</label>
+          <textarea id="notes" rows="6" class="input min-h-[120px]" placeholder="Plazos, garantías, formas de pago, etc."></textarea>
+        </div>
+      </div>
+      <div class="card">
+        <div class="p-4 sm:p-6 space-y-3">
+          <div class="flex items-center justify-between">
+            <span class="text-slate-600">Subtotal</span>
+            <input id="subtotal" class="input w-36 sm:text-right" readonly>
+          </div>
+          <div class="flex items-center justify-between">
+            <label class="inline-flex items-center gap-2 select-none">
+              <input type="checkbox" id="applyTax" class="h-4 w-4 rounded border-slate-300 text-brand focus:ring-brand" checked>
+              <span>IVA 13%</span>
+            </label>
+            <input id="tax" class="input w-36 sm:text-right" readonly>
+          </div>
+          <div class="flex items-center justify-between">
+            <span class="text-slate-600">Descuento Global (%)</span>
+            <input id="globalDiscount" type="number" min="0" max="100" step="0.01" class="input w-36 sm:text-right" value="0" inputmode="decimal">
+          </div>
+          <div class="flex items-center justify-between">
+            <span class="text-slate-600">Envío / Otros</span>
+            <input id="shipping" type="number" min="0" step="0.01" class="input w-36 sm:text-right" value="0" inputmode="decimal">
+          </div>
+          <hr class="border-slate-200">
+          <div class="flex items-center justify-between">
+            <span class="font-semibold">Total a Pagar</span>
+            <input id="grandTotal" class="input w-40 sm:text-right font-semibold" readonly>
+          </div>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <!-- Barra fija móvil -->
+  <div class="no-print fixed inset-x-0 bottom-0 sm:hidden">
+    <div class="mx-4 mb-4 rounded-2xl border border-slate-200 bg-white shadow-soft">
+      <div class="flex items-center justify-between p-3">
+        <div class="text-sm">
+          <div class="text-slate-500 leading-none">Total</div>
+          <div id="stickyTotal" class="font-semibold text-lg">$0.00</div>
+        </div>
+        <div class="flex gap-2">
+          <button id="fab-add" type="button" class="inline-flex items-center gap-2 rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm font-medium text-slate-700 shadow-sm active:scale-[.99]"><i class="bi bi-plus"></i><span>Añadir</span></button>
+          <button id="fab-pdf" type="button" class="inline-flex items-center gap-2 rounded-xl bg-brand px-3 py-2 text-sm font-medium text-white shadow active:scale-[.99]"><i class="bi bi-filetype-pdf"></i><span>PDF</span></button>
+        </div>
+      </div>
     </div>
+  </div>
 
-    <script>
-      /* ===== Color corporativo para PDF ===== */
-      const BRAND = { r: 58, g: 89, b: 152 }; // #3a5998
-      const BRAND_RGB = [BRAND.r, BRAND.g, BRAND.b];
+  <script>
+    /* ===== Color corporativo para PDF ===== */
+    const BRAND = { r:58, g:89, b:152 };           // #3a5998
+    const BRAND_RGB = [BRAND.r, BRAND.g, BRAND.b];
 
-      /* ===== Utilidades ===== */
-      const fmt = new Intl.NumberFormat("es-SV", {
-        style: "currency",
-        currency: "USD",
-      });
-      const unfmt = (v) => Number(String(v).replace(/[^0-9.-]/g, "")) || 0;
-      const todayISO = () => new Date().toISOString().slice(0, 10);
-      const el = (id) => document.getElementById(id);
-      const ls = {
-        get: (k, def) => {
-          try {
-            return JSON.parse(localStorage.getItem(k)) ?? def;
-          } catch {
-            return def;
-          }
-        },
-        set: (k, v) => localStorage.setItem(k, JSON.stringify(v)),
-      };
+    /* ===== Utilidades ===== */
+    const fmt = new Intl.NumberFormat('es-SV', { style:'currency', currency:'USD' });
+    const unfmt = v => Number(String(v).replace(/[^0-9.-]/g,'')) || 0;
+    const todayISO = () => new Date().toISOString().slice(0,10);
+    const el = id => document.getElementById(id);
+    const ls = { get: (k,def)=>{ try{ return JSON.parse(localStorage.getItem(k)) ?? def }catch{ return def } }, set: (k,v)=>localStorage.setItem(k, JSON.stringify(v)) };
 
-      const state = {
-        items: [],
-        header: {
-          code: "",
-          date: todayISO(),
-          client: "",
-          advisor: "TECMA",
-          address: "Carretera troncal del norte y 25 calle oriente #4",
-          validDays: 30,
-          notes: "",
-        },
-        totals: {
-          subtotal: 0,
-          tax: 0,
-          grand: 0,
-          shipping: 0,
-          globalDiscount: 0,
-          applyTax: true,
-        },
-      };
+    const state = { items: [], header: { code:'', date: todayISO(), client:'', advisor:'TECMA', address:'Carretera troncal del norte y 25 calle oriente #4', validDays:30, notes:'' }, totals: { subtotal:0, tax:0, grand:0, shipping:0, globalDiscount:0, applyTax:true } };
 
-      function init() {
-        el("date").value = todayISO();
-        generateQuoteCode();
+    function init(){
+      el('date').value = todayISO();
+      generateQuoteCode();
 
-        // Primera fila sin enfocar descripción
-        addRow({}, false);
+      // Primera fila sin enfocar descripción
+      addRow({}, false);
 
-        bindUI();
-        recalc();
+      bindUI();
+      recalc();
 
-        // Foco inicial en Cliente
-        setTimeout(() => el("client").focus(), 0);
+      // Foco inicial en Cliente
+      setTimeout(() => el('client').focus(), 0);
+    }
+
+    // Tema
+    document.addEventListener('click', (e)=>{
+      if(e.target.closest('#toggleTheme')){
+        const t = document.body.dataset.theme === 'light' ? 'dark' : 'light';
+        document.body.dataset.theme = t;
       }
+    });
 
-      document.addEventListener("click", (e) => {
-        if (e.target.closest("#toggleTheme")) {
-          const t = document.body.dataset.theme === "light" ? "dark" : "light";
-          document.body.dataset.theme = t;
+    // Convierte SVG a PNG (para PDF)
+    async function svgToPngDataURL(svgElement, outW = 300, outH = 180) {
+      const svgString = new XMLSerializer().serializeToString(svgElement);
+      const svgBlob = new Blob([svgString], { type: 'image/svg+xml;charset=utf-8' });
+      const url = URL.createObjectURL(svgBlob);
+      const img = await new Promise((resolve, reject) => {
+        const im = new Image();
+        im.onload = () => resolve(im);
+        im.onerror = reject;
+        im.src = url;
+      });
+      const canvas = document.createElement('canvas');
+      canvas.width = outW; canvas.height = outH;
+      const ctx = canvas.getContext('2d');
+      const scale = Math.min(outW / img.width, outH / img.height);
+      const w = img.width * scale, h = img.height * scale;
+      const x = (outW - w) / 2, y = (outH - h) / 2;
+      ctx.clearRect(0,0,outW,outH);
+      ctx.drawImage(img, x, y, w, h);
+      URL.revokeObjectURL(url);
+      return canvas.toDataURL('image/png');
+    }
+
+    // Obtener tamaño de un DataURL
+    function getImageSizeFromDataURL(dataUrl){
+      return new Promise((resolve, reject) => {
+        const img = new Image();
+        img.onload = () => resolve({ w: img.naturalWidth || img.width, h: img.naturalHeight || img.height });
+        img.onerror = reject;
+        img.src = dataUrl;
+      });
+    }
+
+    // Optimizar imagen a JPEG DataURL
+    function fileToJpegDataURL(file, { maxW = 1800, maxH = 1800, quality = 0.9 } = {}) {
+      return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onerror = reject;
+        reader.onload = () => {
+          const img = new Image();
+          img.onload = () => {
+            let w = img.width, h = img.height;
+            const scale = Math.min(maxW / w, maxH / h, 1);
+            w = Math.max(1, Math.round(w * scale));
+            h = Math.max(1, Math.round(h * scale));
+            const canvas = document.createElement('canvas');
+            canvas.width = w; canvas.height = h;
+            const ctx = canvas.getContext('2d');
+            ctx.drawImage(img, 0, 0, w, h);
+            const jpeg = canvas.toDataURL('image/jpeg', quality);
+            resolve(jpeg);
+          };
+          img.onerror = reject;
+          img.src = reader.result;
+        };
+        reader.readAsDataURL(file);
+      });
+    }
+
+    function generateQuoteCode(){
+      const d = el('date').value || todayISO();
+      const key = `quote-counter-${d}`; const next = (ls.get(key,0) + 1); ls.set(key,next);
+      el('code').value = d.replace(/-/g,'') + '-' + String(next).padStart(3,'0');
+    }
+
+    function bindUI(){
+      // Acciones directas
+      document.getElementById('addRow').addEventListener('click', ()=>addRow());
+      document.getElementById('fab-add').addEventListener('click', ()=>addRow());
+      document.getElementById('fab-pdf').addEventListener('click', generatePDF);
+      document.getElementById('quickAdd').addEventListener('click', openQuickAdd);
+      document.getElementById('import-json').addEventListener('change', importJSON);
+      document.getElementById('generatePdf').addEventListener('click', generatePDF);
+
+      // Delegación robusta para botones del header
+      document.addEventListener('click', (e) => {
+        if (e.target.closest('#btn-new'))  { e.preventDefault(); newQuote(); return; }
+        if (e.target.closest('#btn-save')) { e.preventDefault(); saveQuote(); return; }
+        if (e.target.closest('#btn-load')) { e.preventDefault(); loadQuoteDialog(); return; }
+        if (e.target.closest('#btn-export-json')) { e.preventDefault(); exportJSON(); return; }
+      });
+
+      // Delegación en la tabla
+      const tbody = document.getElementById('tbody');
+
+      // Recalcular por cambios en celdas
+      tbody.addEventListener('input', (e)=>{ const tr = e.target.closest('tr'); if(tr){ calcRow(tr); recalc(); } });
+
+      // Clics varios (foto, preview, borrar)
+      tbody.addEventListener('click', (e)=>{
+        const tr = e.target.closest('tr'); if(!tr) return;
+
+        if (e.target.closest('.photo-btn')) {
+          tr.querySelector('.photo-input[data-source="gallery"]').click(); return;
+        }
+        if (e.target.closest('.photo-btn-mobile.gallery')) {
+          tr.querySelector('.photo-input[data-source="gallery"]').click(); return;
+        }
+        if (e.target.closest('.photo-btn-mobile.camera')) {
+          tr.querySelector('.photo-input[data-source="camera"]').click(); return;
+        }
+
+        const img = e.target.closest('.photo-preview');
+        if (img) {
+          Swal.fire({
+            imageUrl: img.src,
+            imageAlt: 'Foto de referencia',
+            showConfirmButton:false,
+            showCloseButton:true,
+            width: Math.min(700, window.innerWidth - 40)
+          });
+          return;
+        }
+
+        const del = e.target.closest('.del-row');
+        if (del) removeRow(tr);
+      });
+
+      // Al seleccionar/ tomar foto
+      tbody.addEventListener('change', async (e)=>{
+        const input = e.target.closest('.photo-input');
+        if(!input) return;
+        const tr = input.closest('tr');
+        const file = input.files?.[0];
+        if(!file) return;
+
+        const MAX_FILE = 6 * 1024 * 1024;
+        if (file.size > MAX_FILE) {
+          Swal.fire({ icon:'warning', title:'Imagen muy grande', text:'Elige una imagen menor a 6MB.' });
+          input.value = '';
+          return;
+        }
+        try{
+          const dataUrl = await fileToJpegDataURL(file, { maxW: 1800, maxH: 1800, quality: 0.9 });
+          tr.querySelector('.photo-data').value = dataUrl;
+          const img = tr.querySelector('.photo-preview');
+          img.src = dataUrl;
+          img.classList.remove('hidden');
+          readItems();
+          input.value = '';
+        }catch(err){
+          Swal.fire({ icon:'error', title:'No se pudo procesar la imagen', text: String(err) });
         }
       });
 
-      async function svgToPngDataURL(svgElement, outW = 300, outH = 180) {
-        const svgString = new XMLSerializer().serializeToString(svgElement);
-        const svgBlob = new Blob([svgString], {
-          type: "image/svg+xml;charset=utf-8",
-        });
-        const url = URL.createObjectURL(svgBlob);
-        const img = await new Promise((resolve, reject) => {
-          const im = new Image();
-          im.onload = () => resolve(im);
-          im.onerror = reject;
-          im.src = url;
-        });
-        const canvas = document.createElement("canvas");
-        canvas.width = outW;
-        canvas.height = outH;
-        const ctx = canvas.getContext("2d");
-        const scale = Math.min(outW / img.width, outH / img.height);
-        const w = img.width * scale,
-          h = img.height * scale;
-        const x = (outW - w) / 2,
-          y = (outH - h) / 2;
-        ctx.clearRect(0, 0, outW, outH);
-        ctx.drawImage(img, x, y, w, h);
-        URL.revokeObjectURL(url);
-        return canvas.toDataURL("image/png");
-      }
+      // Recalcular totales y sincronizar encabezado
+      ['applyTax','globalDiscount','shipping'].forEach(id=> el(id).addEventListener('input', recalc));
+      ['client','advisor','address','validDays','notes','date'].forEach(id=>{ el(id).addEventListener('input', syncHeader); el(id).addEventListener('change', syncHeader); });
+      el('date').addEventListener('change', ()=>{ generateQuoteCode(); syncHeader(); });
 
-      function getImageSizeFromDataURL(dataUrl) {
-        return new Promise((resolve, reject) => {
-          const img = new Image();
-          img.onload = () =>
-            resolve({
-              w: img.naturalWidth || img.width,
-              h: img.naturalHeight || img.height,
-            });
-          img.onerror = reject;
-          img.src = dataUrl;
-        });
-      }
+      // Acceso rápido con Ctrl+Enter para añadir fila
+      document.addEventListener('keydown', (e)=>{ if(e.ctrlKey && e.key==='Enter'){ e.preventDefault(); addRow(); } });
+    }
 
-      function fileToJpegDataURL(
-        file,
-        { maxW = 1800, maxH = 1800, quality = 0.9 } = {}
-      ) {
-        return new Promise((resolve, reject) => {
-          const reader = new FileReader();
-          reader.onerror = reject;
-          reader.onload = () => {
-            const img = new Image();
-            img.onload = () => {
-              let w = img.width,
-                h = img.height;
-              const scale = Math.min(maxW / w, maxH / h, 1);
-              w = Math.max(1, Math.round(w * scale));
-              h = Math.max(1, Math.round(h * scale));
-              const canvas = document.createElement("canvas");
-              canvas.width = w;
-              canvas.height = h;
-              const ctx = canvas.getContext("2d");
-              ctx.drawImage(img, 0, 0, w, h);
-              const jpeg = canvas.toDataURL("image/jpeg", quality);
-              resolve(jpeg);
-            };
-            img.onerror = reject;
-            img.src = reader.result;
-          };
-          reader.readAsDataURL(file);
-        });
-      }
+    function syncHeader(){
+      state.header = { code: el('code').value, date: el('date').value, client: el('client').value, advisor: el('advisor').value, address: el('address').value, validDays: Number(el('validDays').value)||30, notes: el('notes').value };
+    }
 
-      function generateQuoteCode() {
-        const d = el("date").value || todayISO();
-        const key = `quote-counter-${d}`;
-        const next = ls.get(key, 0) + 1;
-        ls.set(key, next);
-        el("code").value =
-          d.replace(/-/g, "") + "-" + String(next).padStart(3, "0");
-      }
-
-      function bindUI() {
-        document
-          .getElementById("addRow")
-          .addEventListener("click", () => addRow());
-        document
-          .getElementById("fab-add")
-          .addEventListener("click", () => addRow());
-        document.addEventListener("keydown", (e) => {
-          if (e.ctrlKey && e.key === "Enter") {
-            e.preventDefault();
-            addRow();
-          }
-        });
-        document
-          .getElementById("generatePdf")
-          .addEventListener("click", generatePDF);
-        document
-          .getElementById("fab-pdf")
-          .addEventListener("click", generatePDF);
-
-        const tbody = document.getElementById("tbody");
-
-        // Inputs / acciones en la tabla
-        tbody.addEventListener("input", (e) => {
-          const tr = e.target.closest("tr");
-          if (tr) {
-            calcRow(tr);
-            recalc();
-          }
-        });
-        tbody.addEventListener("click", (e) => {
-          const tr = e.target.closest("tr");
-          if (!tr) return;
-
-          // Desktop: icono único
-          if (e.target.closest(".photo-btn")) {
-            tr.querySelector('.photo-input[data-source="gallery"]').click();
-            return;
-          }
-          // Móvil: desde galería
-          if (e.target.closest(".photo-btn-mobile.gallery")) {
-            tr.querySelector('.photo-input[data-source="gallery"]').click();
-            return;
-          }
-          // Móvil: tomar foto (cámara)
-          if (e.target.closest(".photo-btn-mobile.camera")) {
-            tr.querySelector('.photo-input[data-source="camera"]').click();
-            return;
-          }
-          // Ampliar preview
-          const img = e.target.closest(".photo-preview");
-          if (img) {
-            Swal.fire({
-              imageUrl: img.src,
-              imageAlt: "Foto de referencia",
-              showConfirmButton: false,
-              showCloseButton: true,
-              width: Math.min(700, window.innerWidth - 40),
-            });
-            return;
-          }
-          // Eliminar fila
-          const del = e.target.closest(".del-row");
-          if (del) removeRow(tr);
-        });
-
-        // Procesar selección de imagen (cualquiera de los dos inputs)
-        tbody.addEventListener("change", async (e) => {
-          const input = e.target.closest(".photo-input");
-          if (!input) return;
-          const tr = input.closest("tr");
-          const file = input.files?.[0];
-          if (!file) return;
-
-          const MAX_FILE = 6 * 1024 * 1024;
-          if (file.size > MAX_FILE) {
-            Swal.fire({
-              icon: "warning",
-              title: "Imagen muy grande",
-              text: "Elige una imagen menor a 6MB.",
-            });
-            input.value = "";
-            return;
-          }
-          try {
-            const dataUrl = await fileToJpegDataURL(file, {
-              maxW: 1800,
-              maxH: 1800,
-              quality: 0.9,
-            });
-            tr.querySelector(".photo-data").value = dataUrl;
-            const img = tr.querySelector(".photo-preview");
-            img.src = dataUrl;
-            img.classList.remove("hidden");
-            readItems();
-            input.value = ""; // limpiar para permitir seleccionar la misma imagen de nuevo si hace falta
-          } catch (err) {
-            Swal.fire({
-              icon: "error",
-              title: "No se pudo procesar la imagen",
-              text: String(err),
-            });
-          }
-        });
-
-        ["applyTax", "globalDiscount", "shipping"].forEach((id) =>
-          el(id).addEventListener("input", recalc)
-        );
-        ["client", "advisor", "address", "validDays", "notes", "date"].forEach(
-          (id) => {
-            el(id).addEventListener("input", syncHeader);
-            el(id).addEventListener("change", syncHeader);
-          }
-        );
-        el("date").addEventListener("change", () => {
-          generateQuoteCode();
-          syncHeader();
-        });
-      }
-
-      function syncHeader() {
-        state.header = {
-          code: el("code").value,
-          date: el("date").value,
-          client: el("client").value,
-          advisor: el("advisor").value,
-          address: el("address").value,
-          validDays: Number(el("validDays").value) || 30,
-          notes: el("notes").value,
-        };
-      }
-
-      // addRow con dos botones en móvil (galería / cámara)
-      function addRow(data = {}, focusDesc = true) {
-        const tr = document.createElement("tr");
-        tr.className = "odd:bg-white even:bg-slate-50 hover:bg-slate-100";
-        tr.innerHTML = `
+    // addRow con dos botones en móvil (galería / cámara)
+    function addRow(data = {}, focusDesc = true){
+      const tr = document.createElement('tr');
+      tr.className = 'odd:bg-white even:bg-slate-50 hover:bg-slate-100';
+      tr.innerHTML = `
         <td class="px-3 py-2" data-label="SKU"><input class="cell-input sku" placeholder="SKU" /></td>
         <td class="px-3 py-2" data-label="Cantidad"><input type="number" min="0" step="0.01" class="cell-input qty sm:text-right" inputmode="decimal" /></td>
         <td class="px-3 py-2" data-label="Descripción"><input class="cell-input desc" placeholder="Descripción" /></td>
@@ -786,6 +419,7 @@
             <!-- Inputs reales (ocultos) -->
             <input type="file" accept="image/*" class="photo-input hidden" data-source="gallery">
             <input type="file" accept="image/*" class="photo-input hidden" data-source="camera" capture="environment">
+            <!-- Para un solo botón en iOS, usa SOLO el de gallery y QUITA capture (ver nota arriba) -->
 
             <input type="hidden" class="photo-data" />
 
@@ -796,10 +430,10 @@
 
             <!-- Móvil: dos botones -->
             <div class="flex sm:hidden gap-2 w-full">
-              <button class="photo-btn-mobile gallery flex-1 inline-flex items-center justify-center rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm font-medium text-slate-700 shadow-sm active:scale-[.99]" type="button">
+              <button type="button" class="photo-btn-mobile gallery flex-1 inline-flex items-center justify-center rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm font-medium text-slate-700 shadow-sm active:scale-[.99]">
                 <i class="bi bi-image me-2"></i><span>Desde galería</span>
               </button>
-              <button class="photo-btn-mobile camera flex-1 inline-flex items-center justify-center rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm font-medium text-slate-700 shadow-sm active:scale-[.99]" type="button">
+              <button type="button" class="photo-btn-mobile camera flex-1 inline-flex items-center justify-center rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm font-medium text-slate-700 shadow-sm active:scale-[.99]">
                 <i class="bi bi-camera me-2"></i><span>Tomar foto</span>
               </button>
             </div>
@@ -812,138 +446,83 @@
         <td class="px-2 py-2 text-center no-print" data-actions>
           <button class="btn-icon del-row" type="button" title="Eliminar fila"><i class="bi bi-trash"></i></button>
         </td>`;
-        document.getElementById("tbody").appendChild(tr);
+      document.getElementById('tbody').appendChild(tr);
 
-        tr.querySelector(".sku").value = data.sku ?? "";
-        tr.querySelector(".qty").value = data.qty ?? "";
-        tr.querySelector(".desc").value = data.desc ?? "";
-        tr.querySelector(".unit").value = data.unit ?? "";
-        tr.querySelector(".disc").value = data.disc ?? 0;
-        tr.querySelector(".total").value = fmt.format(0);
-        tr.querySelector(".photo-data").value = data.photo ?? "";
-        if (data.photo) {
-          const img = tr.querySelector(".photo-preview");
-          img.src = data.photo;
-          img.classList.remove("hidden");
-        }
+      tr.querySelector('.sku').value  = data.sku  ?? '';
+      tr.querySelector('.qty').value  = data.qty  ?? '';
+      tr.querySelector('.desc').value = data.desc ?? '';
+      tr.querySelector('.unit').value = data.unit ?? '';
+      tr.querySelector('.disc').value = data.disc ?? 0;
+      tr.querySelector('.total').value = fmt.format(0);
+      tr.querySelector('.photo-data').value = data.photo ?? '';
+      if (data.photo) { const img = tr.querySelector('.photo-preview'); img.src = data.photo; img.classList.remove('hidden'); }
 
-        if (focusDesc) tr.querySelector(".desc").focus();
-      }
+      if (focusDesc) tr.querySelector('.desc').focus();
+    }
 
-      function removeRow(tr) {
-        const tbody = document.getElementById("tbody");
-        if (tbody.rows.length === 1) {
-          return Swal.fire({
-            icon: "warning",
-            title: "No se puede eliminar",
-            text: "Debe existir al menos una fila.",
-          });
-        }
-        tr.remove();
-        recalc();
-      }
+    function removeRow(tr){
+      const tbody = document.getElementById('tbody');
+      if(tbody.rows.length === 1){ return Swal.fire({ icon:'warning', title:'No se puede eliminar', text:'Debe existir al menos una fila.' }); }
+      tr.remove(); recalc();
+    }
 
-      function calcRow(tr) {
-        const qty = Number(tr.querySelector(".qty").value) || 0;
-        const unit = Number(tr.querySelector(".unit").value) || 0;
-        const disc = Math.min(
-          100,
-          Math.max(0, Number(tr.querySelector(".disc").value) || 0)
-        );
-        const line = qty * unit * (1 - disc / 100);
-        tr.querySelector(".total").value = fmt.format(line);
-        return line;
-      }
+    function calcRow(tr){
+      const qty = Number(tr.querySelector('.qty').value)||0;
+      const unit = Number(tr.querySelector('.unit').value)||0;
+      const disc = Math.min(100, Math.max(0, Number(tr.querySelector('.disc').value)||0));
+      const line = qty * unit * (1 - disc/100);
+      tr.querySelector('.total').value = fmt.format(line);
+      return line;
+    }
 
-      function readItems() {
-        const items = [];
-        [...document.getElementById("tbody").rows].forEach((tr) => {
-          items.push({
-            sku: tr.querySelector(".sku").value.trim(),
-            qty: Number(tr.querySelector(".qty").value) || 0,
-            desc: tr.querySelector(".desc").value.trim(),
-            unit: Number(tr.querySelector(".unit").value) || 0,
-            disc: Math.min(
-              100,
-              Math.max(0, Number(tr.querySelector(".disc").value) || 0)
-            ),
-            total: unfmt(tr.querySelector(".total").value),
-            photo: tr.querySelector(".photo-data")?.value || "",
-          });
+    function readItems(){
+      const items = [];
+      [...document.getElementById('tbody').rows].forEach(tr=>{
+        items.push({
+          sku: tr.querySelector('.sku').value.trim(),
+          qty: Number(tr.querySelector('.qty').value)||0,
+          desc: tr.querySelector('.desc').value.trim(),
+          unit: Number(tr.querySelector('.unit').value)||0,
+          disc: Math.min(100, Math.max(0, Number(tr.querySelector('.disc').value)||0)),
+          total: unfmt(tr.querySelector('.total').value),
+          photo: tr.querySelector('.photo-data')?.value || ''
         });
-        state.items = items;
-        return items;
-      }
+      });
+      state.items = items; return items;
+    }
 
-      function recalc() {
-        const items = readItems();
-        let subtotal = 0;
-        items.forEach((it) => {
-          subtotal += it.qty * it.unit * (1 - it.disc / 100);
-        });
-        const globalDiscountPct = Math.min(
-          100,
-          Math.max(0, Number(el("globalDiscount").value) || 0)
-        );
-        const globalDiscountAmt = subtotal * (globalDiscountPct / 100);
-        const shipping = Math.max(0, Number(el("shipping").value) || 0);
-        const taxableBase = Math.max(0, subtotal - globalDiscountAmt);
-        const applyTax = el("applyTax").checked;
-        const tax = applyTax ? taxableBase * 0.13 : 0;
-        const grand = taxableBase + tax + shipping;
+    function recalc(){
+      const items = readItems();
+      let subtotal = 0; items.forEach(it=>{ subtotal += it.qty * it.unit * (1 - it.disc/100); });
+      const globalDiscountPct = Math.min(100, Math.max(0, Number(el('globalDiscount').value)||0));
+      const globalDiscountAmt = subtotal * (globalDiscountPct/100);
+      const shipping = Math.max(0, Number(el('shipping').value)||0);
+      const taxableBase = Math.max(0, subtotal - globalDiscountAmt);
+      const applyTax = el('applyTax').checked;
+      const tax = applyTax ? taxableBase * 0.13 : 0;
+      const grand = taxableBase + tax + shipping;
 
-        el("subtotal").value = fmt.format(subtotal);
-        el("tax").value = fmt.format(tax);
-        el("grandTotal").value = fmt.format(grand);
-        document.getElementById("stickyTotal").textContent = fmt.format(grand);
+      el('subtotal').value = fmt.format(subtotal);
+      el('tax').value = fmt.format(tax);
+      el('grandTotal').value = fmt.format(grand);
+      document.getElementById('stickyTotal').textContent = fmt.format(grand);
 
-        state.totals = {
-          subtotal,
-          tax,
-          grand,
-          shipping,
-          globalDiscount: globalDiscountPct,
-          applyTax,
-        };
-        return state.totals;
-      }
+      state.totals = { subtotal, tax, grand, shipping, globalDiscount: globalDiscountPct, applyTax };
+      return state.totals;
+    }
 
-      function validate() {
-        syncHeader();
-        const h = state.header;
-        const items = state.items.length ? state.items : readItems();
-        if (!h.client || !h.advisor) {
-          Swal.fire({
-            icon: "warning",
-            title: "Campos requeridos",
-            text: "Ingrese Cliente y Asesor.",
-          });
-          return false;
-        }
-        if (!/^[0-9]{4}-[0-9]{2}-[0-9]{2}$/.test(h.date)) {
-          Swal.fire({
-            icon: "warning",
-            title: "Fecha inválida",
-            text: "Seleccione una fecha válida.",
-          });
-          return false;
-        }
-        if (
-          !items.length ||
-          items.every((it) => !it.desc || it.qty <= 0 || it.unit <= 0)
-        ) {
-          Swal.fire({
-            icon: "warning",
-            title: "Detalle incompleto",
-            text: "Agregue al menos un ítem válido.",
-          });
-          return false;
-        }
-        return true;
-      }
+    function validate(){
+      syncHeader();
+      const h = state.header; const items = state.items.length? state.items : readItems();
+      if(!h.client || !h.advisor){ Swal.fire({ icon:'warning', title:'Campos requeridos', text:'Ingrese Cliente y Asesor.' }); return false; }
+      if(!/^[0-9]{4}-[0-9]{2}-[0-9]{2}$/.test(h.date)){ Swal.fire({ icon:'warning', title:'Fecha inválida', text:'Seleccione una fecha válida.' }); return false; }
+      if(!items.length || items.every(it=>!it.desc || it.qty<=0 || it.unit<=0)){ Swal.fire({ icon:'warning', title:'Detalle incompleto', text:'Agregue al menos un ítem válido.' }); return false; }
+      return true;
+    }
 
-      function openQuickAdd() {
-        const html = `
+    // Añadir rápido (móvil)
+    function openQuickAdd(){
+      const html = `
         <div class='grid gap-3'>
           <input id='qa-desc' class='swal2-input' placeholder='Descripción'>
           <div class='grid grid-cols-3 gap-2'>
@@ -952,386 +531,209 @@
             <input id='qa-disc' class='swal2-input' type='number' placeholder='Desc.%' inputmode='decimal'>
           </div>
         </div>`;
-        Swal.fire({
-          title: "Añadir rápido",
-          html,
-          showCancelButton: true,
-          confirmButtonText: "Agregar",
-        }).then((r) => {
-          if (!r.isConfirmed) return;
-          const data = {
-            desc: document.getElementById("qa-desc").value,
-            qty: Number(document.getElementById("qa-qty").value) || 0,
-            unit: Number(document.getElementById("qa-unit").value) || 0,
-            disc: Number(document.getElementById("qa-disc").value) || 0,
-          };
-          addRow(data);
-          recalc();
-        });
-      }
-
-      /* ========= PDF ========= */
-      async function generatePDF() {
-        if (!validate()) return;
-
-        readItems();
-
-        const { jsPDF } = window.jspdf;
-        const doc = new jsPDF({
-          orientation: "portrait",
-          unit: "mm",
-          format: "a4",
-        });
-        const h = state.header,
-          t = state.totals,
-          items = state.items;
-
-        let logoPng;
-        try {
-          logoPng = await svgToPngDataURL(
-            document.getElementById("tecmaLogo"),
-            300,
-            180
-          );
-        } catch {}
-
-        // Footer con barra, tel a la izq y "TÉCNICOS EN MAQUINARIA" a la der
-        const drawFooter = () => {
-          const pageH = 297,
-            fh = 18,
-            yTop = pageH - fh;
-          doc.setFillColor(BRAND.r, BRAND.g, BRAND.b);
-          doc.rect(0, yTop, 210, fh, "F");
-          doc.setTextColor(255, 255, 255);
-          doc.setFont("helvetica", "bold");
-          doc.setFontSize(12);
-          doc.text("7558-7258", 10, yTop + fh / 2 + 4);
-          doc.text("TÉCNICOS EN MAQUINARIA", 200, yTop + fh / 2 + 4, {
-            align: "right",
-          });
+      Swal.fire({ title:'Añadir rápido', html, showCancelButton:true, confirmButtonText:'Agregar' }).then(r=>{
+        if(!r.isConfirmed) return;
+        const data = {
+          desc: document.getElementById('qa-desc').value,
+          qty: Number(document.getElementById('qa-qty').value)||0,
+          unit: Number(document.getElementById('qa-unit').value)||0,
+          disc: Number(document.getElementById('qa-disc').value)||0
         };
+        addRow(data); recalc();
+      });
+    }
 
-        // Header
+    /* ========= PDF ========= */
+    async function generatePDF(){
+      if(!validate()) return;
+
+      readItems();
+
+      const { jsPDF } = window.jspdf;
+      const doc = new jsPDF({ orientation:'portrait', unit:'mm', format:'a4' });
+      const h = state.header, t = state.totals, items = state.items;
+
+      let logoPng;
+      try { logoPng = await svgToPngDataURL(document.getElementById('tecmaLogo'), 300, 180); } catch {}
+
+      // Footer con barra, tel a la izq y "TÉCNICOS EN MAQUINARIA" a la der
+      const drawFooter = () => {
+        const pageH = 297, fh = 18, yTop = pageH - fh;
         doc.setFillColor(BRAND.r, BRAND.g, BRAND.b);
-        doc.rect(0, 0, 210, 28, "F");
-        if (logoPng) doc.addImage(logoPng, "PNG", 10, 5, 30, 18);
-        doc.setTextColor(255, 255, 255);
-        doc.setFontSize(16);
-        doc.text("COTIZACIÓN", 50, 12);
-        doc.setFontSize(11);
-        doc.text(`Código: ${h.code}`, 50, 20);
-        doc.setFontSize(10);
-        doc.text(`Fecha: ${h.date}`, 200, 10, { align: "right" });
-        doc.text(`Validez: ${h.validDays} días`, 200, 15, { align: "right" });
-        doc.text(`Asesor: ${h.advisor}`, 200, 20, { align: "right" });
+        doc.rect(0, yTop, 210, fh, 'F');
+        doc.setTextColor(255,255,255);
+        doc.setFont('helvetica','bold'); doc.setFontSize(12);
+        doc.text('7558-7258', 10, yTop + fh/2 + 4);
+        doc.text('TÉCNICOS EN MAQUINARIA', 200, yTop + fh/2 + 4, { align:'right' });
+      };
 
-        // Cliente
-        doc.setTextColor(0, 0, 0);
-        doc.setFontSize(11);
-        const left = 10,
-          top = 38;
-        doc.text(`Cliente: ${h.client}`, left, top);
-        if (h.address) doc.text(`Dirección: ${h.address}`, left, top + 6);
+      // Header
+      doc.setFillColor(BRAND.r, BRAND.g, BRAND.b); doc.rect(0,0,210,28,'F');
+      if (logoPng) doc.addImage(logoPng, 'PNG', 10, 5, 30, 18);
+      doc.setTextColor(255,255,255);
+      doc.setFontSize(16); doc.text('COTIZACIÓN', 50, 12);
+      doc.setFontSize(11); doc.text(`Código: ${h.code}`, 50, 20);
+      doc.setFontSize(10);
+      doc.text(`Fecha: ${h.date}`, 200, 10, { align:'right' });
+      doc.text(`Validez: ${h.validDays} días`, 200, 15, { align:'right' });
+      doc.text(`Asesor: ${h.advisor}`, 200, 20, { align:'right' });
 
-        // Tabla
-        const head = [
-          ["SKU", "Descripción", "Cant.", "P.Unit", "Desc.%", "Total"],
-        ];
-        const body = items.map((it) => [
-          it.sku || "-",
-          it.desc,
-          String(it.qty),
-          fmt.format(it.unit),
-          `${(it.disc || 0).toFixed(2)}%`,
-          fmt.format(it.total),
-        ]);
-        doc.autoTable({
-          head,
-          body,
-          startY: 52,
-          styles: { fontSize: 9, halign: "center" },
-          columnStyles: {
-            1: { halign: "left" },
-            3: { halign: "right" },
-            5: { halign: "right" },
-          },
-          headStyles: { fillColor: BRAND_RGB, textColor: 255 },
-          didDrawPage: () => drawFooter(),
-        });
+      // Cliente
+      doc.setTextColor(0,0,0); doc.setFontSize(11);
+      const left = 10, top = 38; doc.text(`Cliente: ${h.client}`, left, top);
+      if(h.address) doc.text(`Dirección: ${h.address}`, left, top+6);
 
-        // Resumen
-        const y = doc.lastAutoTable.finalY + 6;
-        const sumW = 100,
-          sumX = 210 - 10 - sumW;
-        doc.setFontSize(11);
-        doc.setTextColor(0, 0, 0);
-        doc.text("Resumen", sumX, y);
-        doc.autoTable({
-          head: [["Concepto", "Monto"]],
-          body: [
-            ["Subtotal", fmt.format(t.subtotal)],
-            ["Descuento Global", `${(t.globalDiscount || 0).toFixed(2)}%`],
-            ["IVA 13%", fmt.format(t.tax)],
-            ["Envío / Otros", fmt.format(t.shipping)],
-            ["Total a Pagar", fmt.format(t.grand)],
-          ],
-          startY: y + 2,
-          tableWidth: sumW,
-          margin: { left: sumX },
-          styles: { halign: "right" },
-          columnStyles: { 0: { halign: "left" } },
-          theme: "grid",
-          headStyles: { fillColor: BRAND_RGB, textColor: 255 },
-          didDrawPage: () => drawFooter(),
-        });
+      // Tabla
+      const head = [['SKU','Descripción','Cant.','P.Unit','Desc.%','Total']];
+      const body = items.map(it=>[ it.sku||'-', it.desc, String(it.qty), fmt.format(it.unit), `${(it.disc||0).toFixed(2)}%`, fmt.format(it.total) ]);
+      doc.autoTable({
+        head, body, startY: 52,
+        styles:{ fontSize:9, halign:'center' },
+        columnStyles:{ 1:{halign:'left'}, 3:{halign:'right'}, 5:{halign:'right'} },
+        headStyles:{ fillColor: BRAND_RGB, textColor: 255 },
+        didDrawPage: () => drawFooter()
+      });
 
-        // Notas y firmas
-        let y2 = Math.max(y + 2, doc.lastAutoTable.finalY) + 8;
-        if (h.notes) {
-          doc.setFontSize(10);
-          doc.text("Notas / Términos:", 10, y2);
-          doc.setFontSize(9);
-          const split = doc.splitTextToSize(h.notes, 180);
-          doc.text(split, 10, y2 + 5);
-          y2 += 5 + split.length * 5;
+      // Resumen
+      const y = doc.lastAutoTable.finalY + 6;
+      const sumW = 100, sumX = 210 - 10 - sumW;
+      doc.setFontSize(11); doc.setTextColor(0,0,0); doc.text('Resumen', sumX, y);
+      doc.autoTable({
+        head:[['Concepto','Monto']],
+        body:[
+          ['Subtotal', fmt.format(t.subtotal)],
+          ['Descuento Global', `${(t.globalDiscount||0).toFixed(2)}%`],
+          ['IVA 13%', fmt.format(t.tax)],
+          ['Envío / Otros', fmt.format(t.shipping)],
+          ['Total a Pagar', fmt.format(t.grand)]
+        ],
+        startY: y+2,
+        tableWidth: sumW,
+        margin: { left: sumX },
+        styles:{ halign:'right' },
+        columnStyles:{0:{halign:'left'}},
+        theme:'grid',
+        headStyles:{ fillColor: BRAND_RGB, textColor: 255 },
+        didDrawPage: () => drawFooter()
+      });
+
+      // Notas y firmas
+      let y2 = Math.max(y+2, doc.lastAutoTable.finalY) + 8;
+      if(h.notes){
+        doc.setFontSize(10); doc.text('Notas / Términos:', 10, y2);
+        doc.setFontSize(9); const split = doc.splitTextToSize(h.notes, 180);
+        doc.text(split, 10, y2+5); y2 += 5 + (split.length * 5);
+      }
+      doc.setFontSize(10); doc.text('Firma del Cliente', 25, y2+25); doc.text('Firma del Vendedor', 135, y2+25);
+      doc.line(20, y2+20, 90, y2+20); doc.line(130, y2+20, 200, y2+20);
+      drawFooter();
+
+      // Fotos de referencia (una por página, media página)
+      try{
+        const withPhotos = items.map((it, idx) => ({...it, idx}))
+          .filter(it => it.photo && /^data:image\/(jpeg|png)/i.test(it.photo));
+
+        for (const it of withPhotos) {
+          doc.addPage();
+          doc.setFillColor(BRAND.r, BRAND.g, BRAND.b);
+          doc.rect(0,0,210,20,'F');
+          doc.setTextColor(255,255,255); doc.setFontSize(13);
+          doc.text(`FOTO DE REFERENCIA #${it.idx+1}`, 10, 12);
+
+          const maxW = 190, maxH = 130, topY = 30;
+          const { w:nw, h:nh } = await getImageSizeFromDataURL(it.photo);
+          const scale = Math.min(maxW/nw, maxH/nh);
+          const drawW = Math.max(10, nw*scale), drawH = Math.max(10, nh*scale);
+          const x = (210 - drawW)/2, yImg = topY;
+
+          doc.setDrawColor(230,230,230);
+          doc.rect(x-1, yImg-1, drawW+2, drawH+2);
+          doc.addImage(it.photo, it.photo.startsWith('data:image/png') ? 'PNG' : 'JPEG', x, yImg, drawW, drawH);
+
+          doc.setTextColor(0,0,0); doc.setFontSize(11);
+          const desc = `#${it.idx+1} • ${it.desc || '-'}`;
+          const wrapped = doc.splitTextToSize(desc, 190);
+          doc.text(wrapped, 10, yImg + drawH + 10);
+
+          drawFooter();
         }
-        doc.setFontSize(10);
-        doc.text("Firma del Cliente", 25, y2 + 25);
-        doc.text("Firma del Vendedor", 135, y2 + 25);
-        doc.line(20, y2 + 20, 90, y2 + 20);
-        doc.line(130, y2 + 20, 200, y2 + 20);
-        drawFooter();
+      }catch{}
 
-        // Fotos de referencia (una por página, media página)
-        try {
-          const withPhotos = items
-            .map((it, idx) => ({ ...it, idx }))
-            .filter(
-              (it) => it.photo && /^data:image\/(jpeg|png)/i.test(it.photo)
-            );
+      doc.save(`cotizacion-${h.code}.pdf`);
+    }
 
-          for (const it of withPhotos) {
-            doc.addPage();
-            doc.setFillColor(BRAND.r, BRAND.g, BRAND.b);
-            doc.rect(0, 0, 210, 20, "F");
-            doc.setTextColor(255, 255, 255);
-            doc.setFontSize(13);
-            doc.text(`FOTO DE REFERENCIA #${it.idx + 1}`, 10, 12);
+    // Nueva cotización
+    function newQuote(){
+      Swal.fire({ icon:'question', title:'¿Nueva cotización?', text:'Se limpiará el formulario actual.', showCancelButton:true, confirmButtonText:'Sí, continuar', cancelButtonText:'Cancelar' }).then(r=>{
+        if(!r.isConfirmed) return;
+        document.getElementById('tbody').innerHTML = '';
+        addRow({}, false); // sin enfocar descripción
+        ['client','notes'].forEach(id=> el(id).value='');
+        el('advisor').value='TECMA';
+        el('address').value='Carretera troncal del norte y 25 calle oriente #4';
+        el('validDays').value=30; el('globalDiscount').value=0; el('shipping').value=0; el('applyTax').checked=true;
+        el('date').value = todayISO(); generateQuoteCode(); recalc();
+        setTimeout(()=> el('client').focus(), 0);
+      });
+    }
 
-            const maxW = 190,
-              maxH = 130,
-              topY = 30;
-            const { w: nw, h: nh } = await getImageSizeFromDataURL(it.photo);
-            const scale = Math.min(maxW / nw, maxH / nh);
-            const drawW = Math.max(10, nw * scale),
-              drawH = Math.max(10, nh * scale);
-            const x = (210 - drawW) / 2,
-              yImg = topY;
-
-            doc.setDrawColor(230, 230, 230);
-            doc.rect(x - 1, yImg - 1, drawW + 2, drawH + 2);
-            doc.addImage(
-              it.photo,
-              it.photo.startsWith("data:image/png") ? "PNG" : "JPEG",
-              x,
-              yImg,
-              drawW,
-              drawH
-            );
-
-            doc.setTextColor(0, 0, 0);
-            doc.setFontSize(11);
-            const desc = `#${it.idx + 1} • ${it.desc || "-"}`;
-            const wrapped = doc.splitTextToSize(desc, 190);
-            doc.text(wrapped, 10, yImg + drawH + 10);
-
-            drawFooter();
-          }
-        } catch {}
-
-        doc.save(`cotizacion-${h.code}.pdf`);
-      }
-
-      // Nueva cotización: limpiar y enfocar cliente
-      function newQuote() {
-        Swal.fire({
-          icon: "question",
-          title: "¿Nueva cotización?",
-          text: "Se limpiará el formulario actual.",
-          showCancelButton: true,
-          confirmButtonText: "Sí, continuar",
-          cancelButtonText: "Cancelar",
-        }).then((r) => {
-          if (!r.isConfirmed) return;
-          document.getElementById("tbody").innerHTML = "";
-          addRow({}, false); // no enfocar descripción
-          ["client", "notes"].forEach((id) => (el(id).value = ""));
-          el("advisor").value = "TECMA";
-          el("address").value =
-            "Carretera troncal del norte y 25 calle oriente #4";
-          el("validDays").value = 30;
-          el("globalDiscount").value = 0;
-          el("shipping").value = 0;
-          el("applyTax").checked = true;
-          el("date").value = todayISO();
-          generateQuoteCode();
-          recalc();
-          setTimeout(() => el("client").focus(), 0); // enfocar cliente
-        });
-      }
-
-      // Guardar / cargar / exportar / importar
-      function saveQuote() {
-        if (!validate()) return;
-        const payload = {
-          header: state.header,
-          items: state.items,
-          totals: state.totals,
-          savedAt: new Date().toISOString(),
-        };
-        const key = `quote:${state.header.code}`;
-        ls.set(key, payload);
-        Swal.fire({
-          icon: "success",
-          title: "Guardado",
-          text: `Cotización ${state.header.code} guardada en este navegador.`,
-        });
-      }
-      function listSavedQuotes() {
-        return Object.keys(localStorage)
-          .filter((k) => k.startsWith("quote:"))
-          .map((k) => ls.get(k))
-          .sort((a, b) => (a.savedAt < b.savedAt ? 1 : -1));
-      }
-      function loadQuoteDialog() {
-        const items = listSavedQuotes();
-        if (!items.length)
-          return Swal.fire({
-            icon: "info",
-            title: "Sin datos",
-            text: "No hay cotizaciones guardadas.",
-          });
-        const html = `<div class='flex flex-col gap-2 max-h-80 overflow-auto'>${items
-          .map(
-            (q) =>
-              `<button type='button' data-code='${
-                q.header.code
-              }' class='text-left p-3 rounded-xl border border-slate-200 hover:bg-slate-50'>
+    // Guardar / cargar / exportar / importar
+    function saveQuote(){
+      if(!validate()) return;
+      const payload = { header: state.header, items: state.items, totals: state.totals, savedAt: new Date().toISOString() };
+      const key = `quote:${state.header.code}`; ls.set(key, payload);
+      Swal.fire({ icon:'success', title:'Guardado', text:`Cotización ${state.header.code} guardada en este navegador.`});
+    }
+    function listSavedQuotes(){
+      return Object.keys(localStorage).filter(k=>k.startsWith('quote:')).map(k=> ls.get(k)).sort((a,b)=> a.savedAt<b.savedAt?1:-1);
+    }
+    function loadQuoteDialog(){
+      const items = listSavedQuotes();
+      if(!items.length) return Swal.fire({ icon:'info', title:'Sin datos', text:'No hay cotizaciones guardadas.'});
+      const html = `<div class='flex flex-col gap-2 max-h-80 overflow-auto'>${items.map(q=>
+        `<button type='button' data-code='${q.header.code}' class='text-left p-3 rounded-xl border border-slate-200 hover:bg-slate-50'>
            <div class='flex items-center justify-between'>
-             <span class='font-medium'>${q.header.code} — ${
-                q.header.client || "(sin cliente)"
-              }</span>
-             <span class='text-xs text-slate-500'>${new Date(
-               q.savedAt
-             ).toLocaleString()}</span>
+             <span class='font-medium'>${q.header.code} — ${q.header.client || '(sin cliente)'}</span>
+             <span class='text-xs text-slate-500'>${new Date(q.savedAt).toLocaleString()}</span>
            </div>
-           <div class='text-xs text-slate-500 mt-1'>${q.header.date} • ${
-                q.items.length
-              } ítem(s) • Total ${fmt.format(q.totals.grand)}</div>
-         </button>`
-          )
-          .join("")}</div>`;
-        Swal.fire({
-          title: "Cargar cotización",
-          html,
-          width: 700,
-          didOpen: () => {
-            Swal.getHtmlContainer()
-              .querySelectorAll("button[data-code]")
-              .forEach((btn) => {
-                btn.addEventListener("click", () => {
-                  loadQuoteByCode(btn.getAttribute("data-code"));
-                  Swal.close();
-                });
-              });
-          },
+           <div class='text-xs text-slate-500 mt-1'>${q.header.date} • ${q.items.length} ítem(s) • Total ${fmt.format(q.totals.grand)}</div>
+         </button>`).join('')}</div>`;
+      Swal.fire({ title:'Cargar cotización', html, width:700, didOpen:()=>{
+        Swal.getHtmlContainer().querySelectorAll('button[data-code]').forEach(btn=>{
+          btn.addEventListener('click', ()=>{ loadQuoteByCode(btn.getAttribute('data-code')); Swal.close(); });
         });
-      }
-      function loadQuoteByCode(code) {
-        const q = ls.get(`quote:${code}`);
-        if (!q)
-          return Swal.fire({
-            icon: "error",
-            title: "No encontrada",
-            text: `No existe ${code}.`,
-          });
-        el("code").value = q.header.code;
-        el("date").value = q.header.date;
-        el("client").value = q.header.client;
-        el("advisor").value = q.header.advisor;
-        el("address").value = q.header.address;
-        el("validDays").value = q.header.validDays;
-        el("notes").value = q.header.notes || "";
-        el("globalDiscount").value = q.totals?.globalDiscount ?? 0;
-        el("shipping").value = q.totals?.shipping ?? 0;
-        el("applyTax").checked = q.totals?.applyTax ?? true;
-        const tbody = document.getElementById("tbody");
-        tbody.innerHTML = "";
-        (q.items || []).forEach((row) => addRow(row, false));
-        recalc();
-        setTimeout(() => el("client").focus(), 0);
-      }
-      function exportJSON() {
-        if (!validate()) return;
-        const payload = {
-          header: state.header,
-          items: state.items,
-          totals: state.totals,
-        };
-        const blob = new Blob([JSON.stringify(payload, null, 2)], {
-          type: "application/json",
-        });
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement("a");
-        a.href = url;
-        a.download = `cotizacion-${state.header.code}.json`;
-        a.click();
-        URL.revokeObjectURL(url);
-      }
-      function importJSON(e) {
-        const file = e.target.files?.[0];
-        if (!file) return;
-        const reader = new FileReader();
-        reader.onload = () => {
-          try {
-            const q = JSON.parse(reader.result);
-            if (!q.header || !Array.isArray(q.items))
-              throw new Error("Formato inválido");
-            el("code").value = q.header.code || el("code").value;
-            el("date").value = q.header.date || todayISO();
-            el("client").value = q.header.client || "";
-            el("advisor").value = q.header.advisor || "TECMA";
-            el("address").value =
-              q.header.address ||
-              "Carretera troncal del norte y 25 calle oriente #4";
-            el("validDays").value = q.header.validDays ?? 30;
-            el("notes").value = q.header.notes || "";
-            el("globalDiscount").value = q.totals?.globalDiscount ?? 0;
-            el("shipping").value = q.totals?.shipping ?? 0;
-            el("applyTax").checked = q.totals?.applyTax ?? true;
-            const tbody = document.getElementById("tbody");
-            tbody.innerHTML = "";
-            (q.items || []).forEach((row) => addRow(row, false));
-            recalc();
-            Swal.fire({
-              icon: "success",
-              title: "Importado",
-              text: "Cotización importada correctamente.",
-            });
-            e.target.value = "";
-            setTimeout(() => el("client").focus(), 0);
-          } catch (err) {
-            Swal.fire({
-              icon: "error",
-              title: "Error al importar",
-              text: err.message,
-            });
-          }
-        };
-        reader.readAsText(file);
-      }
+      }});
+    }
+    function loadQuoteByCode(code){
+      const q = ls.get(`quote:${code}`);
+      if(!q) return Swal.fire({ icon:'error', title:'No encontrada', text:`No existe ${code}.`});
+      el('code').value=q.header.code; el('date').value=q.header.date; el('client').value=q.header.client; el('advisor').value=q.header.advisor; el('address').value=q.header.address; el('validDays').value=q.header.validDays; el('notes').value=q.header.notes||'';
+      el('globalDiscount').value=q.totals?.globalDiscount ?? 0; el('shipping').value=q.totals?.shipping ?? 0; el('applyTax').checked= q.totals?.applyTax ?? true;
+      const tbody = document.getElementById('tbody'); tbody.innerHTML=''; (q.items||[]).forEach(row=>addRow(row,false)); recalc();
+      setTimeout(()=> el('client').focus(), 0);
+    }
+    function exportJSON(){
+      if(!validate()) return;
+      const payload = { header: state.header, items: state.items, totals: state.totals };
+      const blob = new Blob([JSON.stringify(payload,null,2)], { type:'application/json' });
+      const url = URL.createObjectURL(blob); const a = document.createElement('a');
+      a.href=url; a.download=`cotizacion-${state.header.code}.json`; a.click(); URL.revokeObjectURL(url);
+    }
+    function importJSON(e){
+      const file = e.target.files?.[0]; if(!file) return; const reader = new FileReader();
+      reader.onload = ()=>{ try{ const q = JSON.parse(reader.result);
+        if(!q.header || !Array.isArray(q.items)) throw new Error('Formato inválido');
+        el('code').value = q.header.code || el('code').value; el('date').value = q.header.date || todayISO(); el('client').value=q.header.client||''; el('advisor').value=q.header.advisor||'TECMA'; el('address').value=q.header.address||'Carretera troncal del norte y 25 calle oriente #4'; el('validDays').value=q.header.validDays??30; el('notes').value=q.header.notes||'';
+        el('globalDiscount').value=q.totals?.globalDiscount ?? 0; el('shipping').value=q.totals?.shipping ?? 0; el('applyTax').checked=q.totals?.applyTax ?? true;
+        const tbody = document.getElementById('tbody'); tbody.innerHTML=''; (q.items||[]).forEach(row=>addRow(row,false)); recalc();
+        Swal.fire({ icon:'success', title:'Importado', text:'Cotización importada correctamente.'}); e.target.value='';
+        setTimeout(()=> el('client').focus(), 0);
+      }catch(err){ Swal.fire({ icon:'error', title:'Error al importar', text: err.message }); } };
+      reader.readAsText(file);
+    }
 
-      init();
-    </script>
-  </body>
+    // Arranque
+    init();
+  </script>
+</body>
 </html>
