@@ -677,10 +677,11 @@
           }
         });
 
-        // Fotos
+        // Fotos: soporta botón icono (desktop) y botón ancho (móvil)
         tbody.addEventListener("click", (e) => {
-          const btn = e.target.closest(".photo-btn");
+          const btn = e.target.closest(".photo-btn, .photo-btn-mobile");
           if (btn) btn.closest("tr").querySelector(".photo-input").click();
+
           const img = e.target.closest(".photo-preview");
           if (img)
             Swal.fire({
@@ -691,6 +692,7 @@
               width: Math.min(700, window.innerWidth - 40),
             });
         });
+
         tbody.addEventListener("change", async (e) => {
           const input = e.target.closest(".photo-input");
           if (!input) return;
@@ -755,7 +757,7 @@
         };
       }
 
-      // >>>>> CAMBIO: addRow acepta focusDesc (default true)
+      // >>>>> addRow acepta focusDesc (true por defecto)
       function addRow(data = {}, focusDesc = true) {
         const tr = document.createElement("tr");
         tr.className = "odd:bg-white even:bg-slate-50 hover:bg-slate-100";
@@ -765,11 +767,20 @@
         <td class="px-3 py-2" data-label="Descripción"><input class="cell-input desc" placeholder="Descripción" /></td>
         <td class="px-3 py-2" data-label="P. Unit"><input type="number" min="0" step="0.01" class="cell-input unit text-right" inputmode="decimal" /></td>
         <td class="px-3 py-2" data-label="Desc. %"><input type="number" min="0" max="100" step="0.01" class="cell-input disc text-right" value="0" inputmode="decimal" /></td>
-        <td class="px-3 py-2" data-label="Foto">
-          <div class="flex items-center gap-2">
-            <button class="btn-icon photo-btn" type="button" title="Agregar foto"><i class="bi bi-camera"></i></button>
+        <td class="px-3 py-2" data-label="Foto" style="width:220px;">
+          <div class="flex items-center gap-2 w-full">
+            <!-- input real -->
             <input type="file" accept="image/*" class="photo-input hidden">
             <input type="hidden" class="photo-data" />
+            <!-- Desktop: ícono -->
+            <button class="btn-icon photo-btn hidden sm:inline-flex" type="button" title="Agregar foto">
+              <i class="bi bi-camera"></i>
+            </button>
+            <!-- Móvil: botón ancho -->
+            <button class="photo-btn-mobile sm:hidden inline-flex items-center justify-center w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm font-medium text-slate-700 shadow-sm active:scale-[.99]" type="button">
+              <i class="bi bi-camera me-2"></i><span>Subir foto</span>
+            </button>
+            <!-- Preview -->
             <img class="photo-preview h-10 w-10 rounded object-cover hidden" alt="Foto" />
           </div>
         </td>
@@ -792,7 +803,7 @@
           img.classList.remove("hidden");
         }
 
-        if (focusDesc) tr.querySelector(".desc").focus(); // <<< foco condicional
+        if (focusDesc) tr.querySelector(".desc").focus();
       }
 
       function removeRow(tr) {
@@ -1145,7 +1156,7 @@
         });
       }
 
-      // Guardar / cargar / exportar / importar (sin cambios funcionales)
+      // Guardar / cargar / exportar / importar
       function saveQuote() {
         if (!validate()) return;
         const payload = {
